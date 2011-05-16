@@ -108,8 +108,8 @@ ISR(AVR_OUTPUT_COMPARE_INT)
 #ifdef __SYSTEM_CLOCK_SETUP__
 /* Setup whole system clock. 
  * ATxmega has a multistage clock system, 
- * to obtain a 125 tick/sec rate we setup no 
- * prescaler on system clock, but only in timer/counter0
+ * to obtain a 125 tick/sec rate we have to setup 
+ * Prescaler A to 2
  */
 void 
 system_clock_init()
@@ -120,7 +120,7 @@ system_clock_init()
 	sei();
 }
 #endif
-#endif /* __AVR_ATxmega256A3 && __SYSTEM_CLOCK_SETUP__*/
+#endif /* __AVR_ATxmega256a3 && __SYSTEM_CLOCK_SETUP__*/
 
 void
 clock_init(void)

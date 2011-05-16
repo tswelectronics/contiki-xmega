@@ -43,9 +43,9 @@
 
 /* MCU and clock rate */
 #define PLATFORM       PLATFORM_AVR
-#define HARWARE_REVISION ATMEGA128RFA1
+#define HARWARE_REVISION ATXMEGA256a3
 #ifndef F_CPU
-#define F_CPU          8000000UL
+#define F_CPU          32768000UL
 #endif
 #include <stdint.h>
 
@@ -61,6 +61,9 @@ void clock_delay(unsigned int us2);
 void clock_wait(int ms10);
 void clock_set_seconds(unsigned long s);
 unsigned long clock_seconds(void);
+
+/*define to setup system clock (32,768 external clock)*/
+//#define __SYSTEM_CLOCK_SETUP__
 
 /* Maximum timer interval for 16 bit clock_time_t */
 #define INFINITE_TIME 0xffff
