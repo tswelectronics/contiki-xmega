@@ -43,9 +43,9 @@
 
 /* MCU and clock rate */
 #define PLATFORM       PLATFORM_AVR
-#define HARWARE_REVISION ATMEGA128RFA1
+#define HARWARE_REVISION ATXMEGA256a3
 #ifndef F_CPU
-#define F_CPU          8000000UL
+#define F_CPU          32768000UL
 #endif
 #include <stdint.h>
 
