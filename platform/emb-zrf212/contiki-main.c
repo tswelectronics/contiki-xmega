@@ -29,6 +29,35 @@
  * This file is part of the Contiki operating system.
  *
  */
+
+#include <stdio.h>
+#include <string.h>
+
+#include "contiki.h"
+#include "contiki-net.h"
+#include "contiki-lib.h"
+/*-------------------------Low level initialization------------------------*/
+/*------Done in a subroutine to keep main routine stack usage small--------*/
+void initialize(void)
+{
+	system_clock_init();
+
+	clock_init();
+
+}
+/*-------------------------------------------------------------------------*/
+/*------------------------- Main Scheduler loop----------------------------*/
+/*-------------------------------------------------------------------------*/
+int
+main(void)
+{
+	initialize();
+
+
+
+}
+
+#if 0
 #ifndef LED_ON_PORT1E
 #define LED_ON_PORTE1 0    //for Michael Hartman's prototype board
 #endif
@@ -569,3 +598,4 @@ extern uint8_t debugflowsize,debugflow[];
   }
   return 0;
 }
+#endif
