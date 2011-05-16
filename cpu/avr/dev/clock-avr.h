@@ -148,6 +148,15 @@
   TIMSK0 = _BV (OCIE0A);
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
+#elif  defined __AVR_ATxmega256A3__
+#define AVR_OUTPUT_COMPARE_INT TCC0_CCA_vect 
+#define CLOCKSetup() \
+	
+#define TCC0Setup() \
+
+
+
+
 #else
 #error "Setup CPU in clock-avr.h"
 #endif
