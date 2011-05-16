@@ -33,24 +33,21 @@
 
 /**
  * \file
- *         Configuration for Embit emb-zrf212, atxmega256a3 based board
+ *         Configuration for Atmel ATmega128rfa1
  * \author
- * 					jacopo mondi mondi@cs.unibo.it
- *
+ *         David Kopf <dak664@embarqmail.com>
  */
 
 #ifndef __CONTIKI_CONF_H__
 #define __CONTIKI_CONF_H__
 
 /* MCU and clock rate */
-#define PLATFORM       PLATFORM_EMB_ZRF212
-#define __EMB_ZRF212__
-#define HARWARE_REVISION ATXMEGA256a3
+#define PLATFORM       PLATFORM_AVR
+#define HARWARE_REVISION ATMEGA128RFA1
 #ifndef F_CPU
-#define F_CPU          32768000UL
+#define F_CPU          8000000UL
 #endif
 #include <stdint.h>
-
 
 typedef int32_t s32_t;
 typedef unsigned char u8_t;
@@ -65,9 +62,6 @@ void clock_wait(int ms10);
 void clock_set_seconds(unsigned long s);
 unsigned long clock_seconds(void);
 
-/*define to setup system clock*/
-//#define __SYSTEM_CLOCK_SETUP__
-
 /* Maximum timer interval for 16 bit clock_time_t */
 #define INFINITE_TIME 0xffff
 
@@ -78,23 +72,14 @@ unsigned long clock_seconds(void);
 #define RIME_CONF_BROADCAST_ANNOUNCEMENT_MAX_TIME CLOCK_CONF_SECOND * 524UL /* Default uses 600UL */
 #define COLLECT_CONF_BROADCAST_ANNOUNCEMENT_MAX_TIME CLOCK_CONF_SECOND * 524UL /* Default uses 600UL */
 
-/*==== LEDS ===*/
-#define __USE_LEDS__ 
-#define LEDPORT PORTB
-#define LEDS_CONF_ALL 0x0f
-#define LED1_bm (1<<0)
-#define LED1_bp 0
-#define LED2_bm (1<<1)
-#define LED2_bp 1
-#define LED3_bm (1<<2)
-#define LED3_bp 2
-#define LED4_bm (1<<3)
-#define LED4_bp 3
+/* Michael Hartman's atmega128rfa1 board has an external 32768Hz crystal connected to TOSC1 and 2 pins similar to the Raven 1284p */
+/* and theoretically can use TIMER2 with it to keep time. Else TIMER0 is used. */
+/* The sleep timer in raven-lcd.c also uses the crystal and adds a TIMER2 interrupt routine if not already define by clock.c */
+/* This has not been tested yet */
+#define AVR_CONF_USE32KCRYSTAL 0
 
-/*=== RS232 ===*/
-#define RS232_PORT_0 USARTd0
-/* COM port to be used for SLIP connection.*/
-#define SLIP_PORT RS232_PORT_0 /*XXX Don't Know.. set it to RS232 Port!*/
+/* COM port to be used for SLIP connection. Not tested on Raven */
+#define SLIP_PORT RS232_PORT_0
 
 /* Pre-allocated memory for loadable modules heap space (in bytes)*/
 /* Default is 4096. Currently used only when elfloader is present. Not tested on Raven */
