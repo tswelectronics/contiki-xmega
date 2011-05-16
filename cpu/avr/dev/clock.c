@@ -113,6 +113,7 @@ ISR(AVR_OUTPUT_COMPARE_INT)
 void 
 system_clock_init()
 {
+	cli();
 
 }
 #endif
