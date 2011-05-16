@@ -40,7 +40,9 @@
 /*------Done in a subroutine to keep main routine stack usage small--------*/
 void initialize(void)
 {
+#if defined(__SYSTEM_CLOCK_SETUP__)
 	system_clock_init();
+#endif /* __SYSTEM_CLOCK_SETUP__*/
 
 	clock_init();
 
