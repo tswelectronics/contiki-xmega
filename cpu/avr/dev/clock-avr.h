@@ -149,13 +149,47 @@
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
 #elif  defined __AVR_ATxmega256A3__
+
+/*interrupt vector*/
 #define AVR_OUTPUT_COMPARE_INT TCC0_CCA_vect 
+
+#if defined__SYSTEM_CLOCK_SETUP__
+#define MAIN_CLK (CLK_t) CLK
+#define CCP_IOREG 0xD8
+/*Setup whole system clock (CLKcpu and CLKper)*/
 #define CLOCKSetup() \
-	
-#define TCC0Setup() \
+	/*external oscillator or clock*/ \
+	MAIN_CLK.CTRL |=  CLK_SCLKSEL0_bm |  CLK_SCLKSEL1_bm; \
+\
+		/*prescaler A = 2*/ \
+	MAIN_CLK.PSADIV |=  CLK_PSADIV0_bm; 
 
+/* lock the clock settings until next restart*/
+#define CLOCKLock() \
+	CPU_CCP = 0xD8; \
+\
+	MAIN_CTRL.LOCK | CLK_LOCK_bm; 
+#endif /*__SYSTEM_CLOCK_SETUP__)*/
 
+/*setup Timer/Counter 0 for system time*/
+/* CLKsys is 32768000
+ * prescaler is 1024 we want 125 ticks/sec
+ * 
+ * 32768000 = 1024 * 125 * 256
+ */
+#define TOP 256U
+#define TIMER (TC0_t) TCC0
+#define CLK_PRE_1024 0x07
 
+#define OCRSetup() \
+ /*setup TOP value*/\
+ TIMER.PERH = (TOP>>8);\
+ TIMER.PERL = (TOP);\
+ /*set timer prescaler at 1024*/\
+ TIMER.CTRLA = CLK_PRE_1024; \
+\
+ /*Set High Priority int. for TC0 overflow*/\
+ TIMER.INTCTRLA |= TC0_OVFINTLVL_gm;
 
 #else
 #error "Setup CPU in clock-avr.h"
