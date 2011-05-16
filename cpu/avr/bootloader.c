@@ -45,11 +45,20 @@ void
 Bootloader_Jump_Check(void)
 {
 	// If the reset source was the bootloader and the key is correct, clear it and jump to the bootloader
+#if defined(__AVR_ATxmega256A3__)
+	if(RST_STATUS & RST_SWRST_bm){
+		RST_STATUS = 0;
+		if(Boot_Key == MAGIC_BOOT_KEY) {
+			Boot_Key = 0;
+			WDT.CTRL |= WDT_CEN_bm;
+			WDT.CTRL &= ~(WDT_ENABLE_bm);
+#else
 	if(MCUSR & (1<<WDRF)) {
 		MCUSR = 0;
 		if(Boot_Key == MAGIC_BOOT_KEY) {
 			Boot_Key = 0;
 			wdt_disable();
+#endif /* __AVR_ATxmega256A3__ */
 			
 			((void (*)(void))BOOTLOADER_START_ADDRESS)();
 		} else {

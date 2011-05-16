@@ -159,23 +159,265 @@ ISR(USART1_RX_vect)
     rs232_ports[RS232_PORT_0].input_handler(c);
   }
 }
+#elif defined (__AVR_ATxmega256A3__)
+	/* The Xmega header file already contains the USART_t 
+	 * type definitio*/
+
+static rs232_t rs232_ports[8] = {
+	{
+		&USARTC0.DATA,
+		&USARTC0.BAUDCTRLA,
+		&USARTC0.BAUDCTRLB,
+		&USARTC0.CTRLB,
+		&USARTC0.CTRLA,
+		&USARTC0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTC1.DATA,
+		&USARTC1.BAUDCTRLA,
+		&USARTC1.BAUDCTRLB,
+		&USARTC1.CTRLB,
+		&USARTC1.CTRLA,
+		&USARTC1.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTD0.DATA,
+		&USARTD0.BAUDCTRLA,
+		&USARTD0.BAUDCTRLB,
+		&USARTD0.CTRLB,
+		&USARTD0.CTRLA,
+		&USARTD0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTD1.DATA,
+		&USARTD1.BAUDCTRLA,
+		&USARTD1.BAUDCTRLB,
+		&USARTD1.CTRLB,
+		&USARTD1.CTRLA,
+		&USARTD1.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTE0.DATA,
+		&USARTE0.BAUDCTRLA,
+		&USARTE0.BAUDCTRLB,
+		&USARTE0.CTRLB,
+		&USARTE0.CTRLA,
+		&USARTE0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTE1.DATA,
+		&USARTE1.BAUDCTRLA,
+		&USARTE1.BAUDCTRLB,
+		&USARTE1.CTRLB,
+		&USARTE1.CTRLA,
+		&USARTE1.CTRLC,
+		0,
+		NULL
+	},
+
+	{
+		&USARTF0.DATA,
+		&USARTF0.BAUDCTRLA,
+		&USARTF0.BAUDCTRLB,
+		&USARTF0.CTRLB,
+		&USARTF0.CTRLA,
+		&USARTF0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTF1.DATA,
+		&USARTF1.BAUDCTRLA,
+		&USARTF1.BAUDCTRLB,
+		&USARTF1.CTRLB,
+		&USARTF1.CTRLA,
+		&USARTF1.CTRLC,
+		0,
+		NULL
+	},
+};
+
+/*-- interrupt level HIGH for transmit, empty and receive --*/
+USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = USART_RXCINTLVL_HI_gc;
+USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE = USART_TXCINTLVL_HI_gc;
+
+/*=== Interrupt Routines ===*/
+/*--USARTC0------------------------------------------------------------------*/
+ISR(USARTC0_TXC_vect)
+{
+  rs232_ports[USARTc0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTC0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTc0].DATA);
+
+  if(rs232_ports[USARTc0].input_handler != NULL) {
+    rs232_ports[USARTc0].input_handler(c);
+  }
+}
+
+/*---USARTC1-----------------------------------------------------------------*/
+ISR(USARTC1_TXC_vect)
+{
+  rs232_ports[USARTc1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTC1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTc1].DATA);
+
+  if(rs232_ports[USARTc1].input_handler != NULL) {
+    rs232_ports[USARTc1].input_handler(c);
+  }
+}
+
+/*---USARTD0-----------------------------------------------------------------*/
+ISR(USARTD0_TXC_vect)
+{
+  rs232_ports[USARTd0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTD0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTd0].DATA);
+
+  if(rs232_ports[USARTd0].input_handler != NULL) {
+    rs232_ports[USARTd0].input_handler(c);
+  }
+}
+/*---USARTD1-----------------------------------------------------------------*/
+ISR(USARTD1_TXC_vect)
+{
+  rs232_ports[USARTd1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTD1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTd1].DATA);
+
+  if(rs232_ports[USARTd1].input_handler != NULL) {
+    rs232_ports[USARTd1].input_handler(c);
+  }
+}
+
+/*---USARTE0-----------------------------------------------------------------*/
+ISR(USARTE0_TXC_vect)
+{
+  rs232_ports[USARTe0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTE0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTe0].DATA);
+
+  if(rs232_ports[USARTe0].input_handler != NULL) {
+    rs232_ports[USARTe0].input_handler(c);
+  }
+}
+
+/*---USARTE1-----------------------------------------------------------------*/
+ISR(USARTE1_TXC_vect)
+{
+  rs232_ports[USARTe1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTE1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTe1].DATA);
+
+  if(rs232_ports[USARTe1].input_handler != NULL) {
+    rs232_ports[USARTe1].input_handler(c);
+  }
+}
+
+/*---USARTF0-----------------------------------------------------------------*/
+ISR(USARTF0_TXC_vect)
+{
+  rs232_ports[USARTf0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTF0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTf0].DATA);
+
+  if(rs232_ports[USARTf0].input_handler != NULL) {
+    rs232_ports[USARTf0].input_handler(c);
+  }
+}
+
+#if 0
+/*---USARTF1-----------------------------------------------------------------*/
+ISR(USARTF1_TXC_vect)
+{
+  rs232_ports[USARTf1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTF1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTf1].DATA);
+
+  if(rs232_ports[USARTf1].input_handler != NULL) {
+    rs232_ports[USARTf1].input_handler(c);
+  }
+}
+#endif /*#if 0*/
+
 #else
 #error Please define the UART registers for your MCU!
 #endif
 
 /*---------------------------------------------------------------------------*/
 void
-rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
+rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 {
-  *(rs232_ports[port].UBRRH) = (uint8_t)(bd>>8);
-  *(rs232_ports[port].UBRRL) = (uint8_t)bd;
+	rs232_t *rs232 = &rs232_ports[port];
+
+	/*
+	 * Setup baudrate
+	 */
+  (*(*rs232).BAUDH) = (uint8_t)(bd>>8);
+  (*(*rs232).BAUDL) = (uint8_t)bd;
 
   /*
-   * - Enable receiver and transmitter,
-   * - Enable interrupts for receiver and transmitter
+   * - Enable receiver and transmitter
+	 */
+	(*(*rs232).FUNCTION) |= 
+					USART_RECEIVER_ENABLE |
+					USART_TRANSMITTER_ENABLE;
+  /* - Enable interrupts for receiver and transmitter
+	 *   (high priority interrupts for xmega)
    */
-  *(rs232_ports[port].UCSRB) = USART_INTERRUPT_RX_COMPLETE | USART_INTERRUPT_TX_COMPLETE | \
-    USART_RECEIVER_ENABLE | USART_TRANSMITTER_ENABLE;
+	*(rs232).INTERRUPT|= 
+					USART_INTERRUPT_DATA_REG_EMPTY |
+	 				USART_INTERRUPT_RX_COMPLETE |
+					USART_INTERRUPT_TX_COMPLETE;
 
   /*
    * - mode (sync. / async)
@@ -184,11 +426,10 @@ rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
    * - charater size (9 bits are currently not supported)
    * - clock polarity
    */
-  *(rs232_ports[port].UCSRC) = ffmt;
+	(*(*rs232).FORMAT) = ffmt;
 
-  rs232_ports[port].txwait = 0;
-
-  rs232_ports[port].input_handler = NULL;
+  (*rs232).txwait = 0;
+  (*rs232).input_handler = NULL;
 }
 
 void

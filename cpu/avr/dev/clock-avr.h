@@ -148,6 +148,32 @@
   TIMSK0 = _BV (OCIE0A);
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
+#elif  defined __AVR_ATxmega256A3__
+
+/*interrupt vector*/
+#define AVR_OUTPUT_COMPARE_INT TCC0_CCA_vect 
+/*setup Timer/Counter 0 for system time*/
+/* CLKsys is 32768000
+ * prescaler is 1024 we want 125 ticks/sec
+ * 
+ * 32768000 = 1024 * 125 * 256
+ */
+#define TOP 256U
+/* use Timer/Counter 0 from timing*/
+#define TIMER TCC0
+/*set Prescaler to 1024. System CLK as refernce*/
+#define CLK_PRE_1024 0x07
+
+#define OCRSetup() \
+ /*setup TOP value*/\
+ TIMER.PERH = (TOP>>8);\
+ TIMER.PERL = (uint8_t) (TOP);\
+ /*set timer prescaler at 1024*/\
+ TIMER.CTRLA = CLK_PRE_1024; \
+\
+ /*Set High Priority int. for TC0 overflow*/\
+ TIMER.INTCTRLA |= TC0_OVFINTLVL_gm;
+
 #else
 #error "Setup CPU in clock-avr.h"
 #endif
