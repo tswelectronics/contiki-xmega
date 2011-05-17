@@ -72,6 +72,17 @@
 #define CLOCK_LT(a, b) ((clock_time_t)((a) - (b)) < ((clock_time_t)(~((clock_time_t)0)) >> 1))
 #endif /* 0 */
 
+#if defined(__SYSTEM_CLOCK_SETUP__)
+/* Initialize system clock.
+ * 
+ * If the board provides a bootloader it usually setup code, else
+ * it must be done in itialization. Fuction has to be called from 
+ * main() in platform specific contiki-main.c
+ *
+ */
+void system_clock_init();
+#endif /* SYSTEM_CLOCK_SETUP */
+
 /**
  * Initialize the clock library.
  *
