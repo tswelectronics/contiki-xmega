@@ -64,9 +64,8 @@
 /******************************************************************************/
 /***   Interrupt settings                                                     */
 /******************************************************************************/
-enum USART_RXCINTLVL_enum USART_INTERRUPT_RX_COMPLETE;
-enum USART_TXCINTLVL_enum USART_INTERRUPT_TX_COMPLETE;
-enum USART_USART_DREINTLVL_enum USART_INTERRUPT_DATA_REG_EMPTY;  
+USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE;
+USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE;
 
 /******************************************************************************/
 /***   Receiver / transmitter                                                 */
@@ -77,15 +76,24 @@ enum USART_USART_DREINTLVL_enum USART_INTERRUPT_DATA_REG_EMPTY;
 /******************************************************************************/
 /***   Mode select                                                            */
 /******************************************************************************/
-enum USART_CMODE_enum USART_CMODE;
+USART_CMODE_t USART_CMODE;
+
+/******************************************************************************/
+/***   Stop bit select                                                            */
+/******************************************************************************/
+typedef enum USART_SMODE_enum
+{
+	USART_SMODE_1BIT_gc = 0x00,
+	USART_SMODE_2BIT_gc = (0x01<<3),
+} USART_SMODE_t;
 
 /******************************************************************************/
 /***   Parity                                                                 */
 /******************************************************************************/
-enum USART_PMODE_enum USART_PMODE;
+USART_PMODE_t USART_PMODE;
 /******************************************************************************/
 /***   Character size                                                         */
 /******************************************************************************/
-enum USART_CHSIZE_enum USART_DATA_BITS;
+USART_CHSIZE_t USART_DATA_BITS;
 
 #endif /* #ifndef __RS232_ATMEGA128__ */
