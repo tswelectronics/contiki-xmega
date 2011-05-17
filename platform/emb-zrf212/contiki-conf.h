@@ -43,7 +43,7 @@
 #define __CONTIKI_CONF_H__
 
 /* MCU and clock rate */
-#define PLATFORM       PLATFORM_AVR
+#define PLATFORM       PLATFORM_EMB_ZRF212
 #define HARWARE_REVISION ATXMEGA256a3
 #ifndef F_CPU
 #define F_CPU          32768000UL
@@ -82,6 +82,15 @@ unsigned long clock_seconds(void);
 /* The sleep timer in raven-lcd.c also uses the crystal and adds a TIMER2 interrupt routine if not already define by clock.c */
 /* This has not been tested yet */
 #define AVR_CONF_USE32KCRYSTAL 0
+
+/*==== LEDS ===*/
+#define __USE_LEDS__ 1
+#define LEDPORT PORTB
+#define LEDS_CONF_ALL 0x0f
+#define LED1_bm (1<<0)
+#define LED2_bm (1<<1)
+#define LED3_bm (1<<2)
+#define LED4_bm (1<<3)
 
 /* COM port to be used for SLIP connection. Not tested on Raven */
 #define SLIP_PORT RS232_PORT_0
