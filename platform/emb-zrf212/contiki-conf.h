@@ -88,9 +88,13 @@ unsigned long clock_seconds(void);
 #define LEDPORT PORTB
 #define LEDS_CONF_ALL 0x0f
 #define LED1_bm (1<<0)
+#define LED1_bp 0
 #define LED2_bm (1<<1)
+#define LED2_bp 1
 #define LED3_bm (1<<2)
+#define LED3_bp 2
 #define LED4_bm (1<<3)
+#define LED4_bp 3
 
 /* COM port to be used for SLIP connection. Not tested on Raven */
 #define SLIP_PORT RS232_PORT_0
