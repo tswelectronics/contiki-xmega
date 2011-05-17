@@ -38,11 +38,17 @@
 #include "contiki-lib.h"
 
 #include "dev/leds.h"
+#include "dev/rs232.h"
 
 /*-------------------------Low level initialization------------------------*/
 /*------Done in a subroutine to keep main routine stack usage small--------*/
 void initialize(void)
 {
+	uint16_t baud=212; /*baud 9600 @32760 KHz*/
+	USART_CHSIZE_t chsize = USART_CHSIZE_8BIT_gc;
+	USART_PMODE_t pmode = USART_CMODE_ASYNCHRONOUS_gc;
+	USART_CMODE_t cmode = USART_PMODE_DISABLED_gc;
+	USART_SMODE_t smode = USART_SMODE_1BIT_gc;
 	/*--- Setup system clock (if required) and start timer */
 #if defined(__SYSTEM_CLOCK_SETUP__)
 	system_clock_init();
@@ -53,6 +59,10 @@ void initialize(void)
 	/*--- Setup led module -- */
 	leds_init();
 #endif /* __USE_LEDS__ */
+
+	/*setup serial port on USARTD0*/
+	rs232_init(RS232_PORT_0, baud, 
+			(chsize | pmode | cmode | smode) );
 
 	return;
 
