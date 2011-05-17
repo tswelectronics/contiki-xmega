@@ -104,7 +104,8 @@ ISR(AVR_OUTPUT_COMPARE_INT)
 }
 
 /*---------------------------------------------------------------------------*/
-#ifdef __AVR_ATxmega256A3__ && defined (__SYSTEM_CLOCK_SETUP__)
+#ifdef __AVR_ATxmega256A3__  
+#ifdef __SYSTEM_CLOCK_SETUP__
 /* Setup whole system clock. 
  * ATxmega has a multistage clock system, 
  * to obtain a 125 tick/sec rate we have to setup 
@@ -119,6 +120,7 @@ system_clock_init()
 	sei();
 }
 #endif
+#endif /* __AVR_ATxmega256a3 && __SYSTEM_CLOCK_SETUP__*/
 
 void
 clock_init(void)
