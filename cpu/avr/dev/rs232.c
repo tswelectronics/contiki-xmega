@@ -29,6 +29,18 @@
  * This file is part of the Contiki operating system.
  *
  * @(#)$Id: rs232.c,v 1.7 2010/10/27 14:51:20 dak664 Exp $
+ * modified on 2011/05/17 jacopo mondi mondi@cs.unibo.it
+ */
+
+/* \file
+ * 				RS232 implementation for various AVR (currently
+ * 				ATmega, ATxmega and AV90USB).
+ * 				Features the rs232_port structure where each device maps
+ * 				its register in order to provide an uniform point
+ * 				of view
+ * \author
+ * 				2010/10/27 dak664
+ * 				2011/5/17 jacopo mondi <mondi@cs.unibo.it>	
  */
 
 #include <stdio.h>
@@ -52,22 +64,31 @@
 #define ADD_CARRAGE_RETURNS_TO_SERIAL_OUTPUT 1
 #endif
 
-#if defined (__AVR_ATmega128__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega128RFA1__)
+
+/* This is a generic UART structure.
+ * Each platform maps corresponding registers into
+ * structure elements.
+ * This convention (hopefully) works for atmega, atxmega, and at90usb
+ */
 typedef struct {
-  volatile uint8_t * UDR;
-  volatile uint8_t * UBRRH;
-  volatile uint8_t * UBRRL;
-  volatile uint8_t * UCSRB;
-  volatile uint8_t * UCSRC;
+  volatile uint8_t * DATA;
+  volatile uint8_t * BAUDH;
+  volatile uint8_t * BAUDL;
+  volatile uint8_t * FUNCTION;
+  volatile uint8_t * INTERRUPT;
+  volatile uint8_t * FORMAT;
   volatile uint8_t txwait;
   int (* input_handler)(unsigned char);
 } rs232_t;
+
+#if defined (__AVR_ATmega128__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega128RFA1__)
 
 static rs232_t rs232_ports[2] = {
   {   // UART0
     &UDR0,
     &UBRR0H,
     &UBRR0L,
+    &UCSR0B,
     &UCSR0B,
     &UCSR0C,
     0,
@@ -78,6 +99,7 @@ static rs232_t rs232_ports[2] = {
     &UDR1,
     &UBRR1H,
     &UBRR1L,
+    &UCSR1B,
     &UCSR1B,
     &UCSR1C,
     0,
@@ -95,7 +117,7 @@ ISR(USART0_RX_vect)
 {
   unsigned char c;
 
-  c = *(rs232_ports[RS232_PORT_0].UDR);
+  c = *(rs232_ports[RS232_PORT_0].DATA);
 
   if(rs232_ports[RS232_PORT_0].input_handler != NULL) {
     rs232_ports[RS232_PORT_0].input_handler(c);
@@ -112,7 +134,7 @@ ISR(USART1_RX_vect)
 {
   unsigned char c;
 
-  c = *(rs232_ports[RS232_PORT_1].UDR);
+  c = *(rs232_ports[RS232_PORT_1].DATA);
 
   if(rs232_ports[RS232_PORT_1].input_handler != NULL) {
     rs232_ports[RS232_PORT_1].input_handler(c);
@@ -121,21 +143,12 @@ ISR(USART1_RX_vect)
 
 #elif defined (__AVR_AT90USB1287__)
 /* Has only UART1, map it to port 0 */
-typedef struct {
-  volatile uint8_t * UDR;
-  volatile uint8_t * UBRRH;
-  volatile uint8_t * UBRRL;
-  volatile uint8_t * UCSRB;
-  volatile uint8_t * UCSRC;
-  volatile uint8_t txwait;
-  int (* input_handler)(unsigned char);
-} rs232_t;
-
 static rs232_t rs232_ports[1] = {
   {  // UART1
     &UDR1,
     &UBRR1H,
     &UBRR1L,
+    &UCSR1B,
     &UCSR1B,
     &UCSR1C,
     0,
@@ -153,12 +166,241 @@ ISR(USART1_RX_vect)
 {
   unsigned char c;
 
-  c = *(rs232_ports[RS232_PORT_0].UDR);
+  c = *(rs232_ports[RS232_PORT_0].DATA);
 
   if(rs232_ports[RS232_PORT_0].input_handler != NULL) {
     rs232_ports[RS232_PORT_0].input_handler(c);
   }
 }
+#elif defined (__AVR_ATxmega256a3__)
+	/* The Xmega header file already contains the USART_t 
+	 * type definitio*/
+
+static rs232_t rs232_ports[8] = {
+	{
+		&USARTC0.DATA,
+		&USARTC0.BAUDCTRLA,
+		&USARTC0.BAUDCTRLB,
+		&USARTC0.CTRLB,
+		&USARTC0.CTRLA,
+		&USARTC0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTC1.DATA,
+		&USARTC1.BAUDCTRLA,
+		&USARTC1.BAUDCTRLB,
+		&USARTC1.CTRLB,
+		&USARTC1.CTRLA,
+		&USARTC1.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTD0.DATA,
+		&USARTD0.BAUDCTRLA,
+		&USARTD0.BAUDCTRLB,
+		&USARTD0.CTRLB,
+		&USARTD0.CTRLA,
+		&USARTD0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTD1.DATA,
+		&USARTD1.BAUDCTRLA,
+		&USARTD1.BAUDCTRLB,
+		&USARTD1.CTRLB,
+		&USARTD1.CTRLA,
+		&USARTD1.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTE0.DATA,
+		&USARTE0.BAUDCTRLA,
+		&USARTE0.BAUDCTRLB,
+		&USARTE0.CTRLB,
+		&USARTE0.CTRLA,
+		&USARTE0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTE1.DATA,
+		&USARTE1.BAUDCTRLA,
+		&USARTE1.BAUDCTRLB,
+		&USARTE1.CTRLB,
+		&USARTE1.CTRLA,
+		&USARTE1.CTRLC,
+		0,
+		NULL
+	},
+
+	{
+		&USARTF0.DATA,
+		&USARTF0.BAUDCTRLA,
+		&USARTF0.BAUDCTRLB,
+		&USARTF0.CTRLB,
+		&USARTF0.CTRLA,
+		&USARTF0.CTRLC,
+		0,
+		NULL
+	},
+	{
+		&USARTF1.DATA,
+		&USARTF1.BAUDCTRLA,
+		&USARTF1.BAUDCTRLB,
+		&USARTF1.CTRLB,
+		&USARTF1.CTRLA,
+		&USARTF1.CTRLC,
+		0,
+		NULL
+	},
+};
+
+/*-- interrupt level HIGH for transmit, empty and receive --*/
+USART_INTERRUPT_DATA_REG_EMPTY = USART_DREINTLVL_HI_gc; 
+USART_INTERRUPT_RX_COMPLETE = USART_RXCINTLVL_HI_gc;
+USART_INTERRUPT_TX_COMPLETE = USART_TXCINTLVL_HI_gc;
+
+/*=== Interrupt Routines ===*/
+/*--USARTC0------------------------------------------------------------------*/
+ISR(USARTC0_TXC_vect)
+{
+  rs232_ports[USARTc0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTC0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTc0].DATA);
+
+  if(rs232_ports[USARTc0].input_handler != NULL) {
+    rs232_ports[USARTc0].input_handler(c);
+  }
+}
+
+/*---USARTC1-----------------------------------------------------------------*/
+ISR(USARTC1_TXC_vect)
+{
+  rs232_ports[USARTc1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTC1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTc1].DATA);
+
+  if(rs232_ports[USARTc1].input_handler != NULL) {
+    rs232_ports[USARTc1].input_handler(c);
+  }
+}
+
+/*---USARTD0-----------------------------------------------------------------*/
+ISR(USARTD0_TXC_vect)
+{
+  rs232_ports[USARTd0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTD0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTd0].DATA);
+
+  if(rs232_ports[USARTd0].input_handler != NULL) {
+    rs232_ports[USARTd0].input_handler(c);
+  }
+}
+/*---USARTD1-----------------------------------------------------------------*/
+ISR(USARTD1_TXC_vect)
+{
+  rs232_ports[USARTd1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTD1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTd1].DATA);
+
+  if(rs232_ports[USARTd1].input_handler != NULL) {
+    rs232_ports[USARTd1].input_handler(c);
+  }
+}
+
+/*---USARTE0-----------------------------------------------------------------*/
+ISR(USARTE0_TXC_vect)
+{
+  rs232_ports[USARTe0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTE0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTe0].DATA);
+
+  if(rs232_ports[USARTe0].input_handler != NULL) {
+    rs232_ports[USARTe0].input_handler(c);
+  }
+}
+
+/*---USARTE1-----------------------------------------------------------------*/
+ISR(USARTE1_TXC_vect)
+{
+  rs232_ports[USARTe1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTE1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTe1].DATA);
+
+  if(rs232_ports[USARTe1].input_handler != NULL) {
+    rs232_ports[USARTe1].input_handler(c);
+  }
+}
+
+/*---USARTF0-----------------------------------------------------------------*/
+ISR(USARTF0_TXC_vect)
+{
+  rs232_ports[USARTf0].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTF0_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTf0].DATA);
+
+  if(rs232_ports[USARTf0].input_handler != NULL) {
+    rs232_ports[USARTf0].input_handler(c);
+  }
+}
+
+/*---USARTF1-----------------------------------------------------------------*/
+ISR(USARTF1_TXC_vect)
+{
+  rs232_ports[USARTf1].txwait = 0;
+}
+/*---------------------------------------------------------------------------*/
+ISR(USARTF1_RXC_vect)
+{
+  unsigned char c;
+
+  c = *(rs232_ports[USARTf1].DATA);
+
+  if(rs232_ports[USARTf1].input_handler != NULL) {
+    rs232_ports[USARTf1].input_handler(c);
+  }
+}
+
 #else
 #error Please define the UART registers for your MCU!
 #endif
@@ -167,15 +409,26 @@ ISR(USART1_RX_vect)
 void
 rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
 {
-  *(rs232_ports[port].UBRRH) = (uint8_t)(bd>>8);
-  *(rs232_ports[port].UBRRL) = (uint8_t)bd;
+	rs232_t *rs232 = rs232_ports[port];
+
+	/*
+	 * Setup baudrate
+	 */
+  *(rs232).BAUDH = (uint8_t)(bd>>8);
+  *(rs232).BAUDL = (uint8_t)bd;
 
   /*
    * - Enable receiver and transmitter,
    * - Enable interrupts for receiver and transmitter
+	 *   (high priority interrupts for xmega)
    */
-  *(rs232_ports[port].UCSRB) = USART_INTERRUPT_RX_COMPLETE | USART_INTERRUPT_TX_COMPLETE | \
-    USART_RECEIVER_ENABLE | USART_TRANSMITTER_ENABLE;
+	*(rs232).FUNCTION |= 
+					USART_RECEIVER_ENABLE |
+					USART_TRANSMITTER_ENABLE;
+	*(rs232).INTERRUPT|= 
+					USART_INTERRUPT_DATA_REG_EMPTY |
+	 				USART_INTERRUPT_RX_COMPLETE |
+					USART_INTERRUPT_TX_COMPLETE;
 
   /*
    * - mode (sync. / async)
@@ -184,11 +437,10 @@ rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
    * - charater size (9 bits are currently not supported)
    * - clock polarity
    */
-  *(rs232_ports[port].UCSRC) = ffmt;
+	*(rs232).FORMAT = ffmt;
 
-  rs232_ports[port].txwait = 0;
-
-  rs232_ports[port].input_handler = NULL;
+  *(rs232).txwait = 0;
+  *(rs232).input_handler = NULL;
 }
 
 void
@@ -230,7 +482,7 @@ void
 rs232_send(uint8_t port, unsigned char c)
 {
   rs232_ports[port].txwait = 1;
-  *(rs232_ports[port].UDR) = c;
+  *(rs232_ports[port].DATA) = c;
   while(rs232_ports[port].txwait);
 }
 /*---------------------------------------------------------------------------*/
