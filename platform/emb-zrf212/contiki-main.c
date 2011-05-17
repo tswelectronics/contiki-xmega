@@ -45,6 +45,7 @@ void initialize(void)
 #endif /* __SYSTEM_CLOCK_SETUP__*/
 
 	clock_init();
+	return;
 
 }
 /*-------------------------------------------------------------------------*/
@@ -55,7 +56,7 @@ main(void)
 {
 	initialize();
 
-
+	return 0;
 
 }
 
