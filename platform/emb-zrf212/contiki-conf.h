@@ -33,9 +33,10 @@
 
 /**
  * \file
- *         Configuration for Atmel ATmega128rfa1
+ *         Configuration for Embit emb-zrf212, atxmega256a3 based board
  * \author
- *         David Kopf <dak664@embarqmail.com>
+ * 					jacopo mondi mondi@cs.unibo.it
+ *
  */
 
 #ifndef __CONTIKI_CONF_H__
@@ -48,6 +49,7 @@
 #define F_CPU          32768000UL
 #endif
 #include <stdint.h>
+
 
 typedef int32_t s32_t;
 typedef unsigned char u8_t;
