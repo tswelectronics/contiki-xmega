@@ -64,8 +64,8 @@
 /******************************************************************************/
 /***   Interrupt settings                                                     */
 /******************************************************************************/
-USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE;
-USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE;
+//USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE;
+//USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE;
 
 /******************************************************************************/
 /***   Receiver / transmitter                                                 */
