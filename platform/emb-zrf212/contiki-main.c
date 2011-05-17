@@ -61,7 +61,8 @@ void initialize(void)
 #endif /* __USE_LEDS__ */
 
 	/*setup serial port on USARTD0*/
-	rs232_init(USARTd0, baud, chsize | pmode | cmode | smode);
+	rs232_init(RS232_PORT_0, baud, 
+			(chsize | pmode | cmode | smode) );
 
 	return;
 
