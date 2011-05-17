@@ -44,6 +44,7 @@
 
 /* MCU and clock rate */
 #define PLATFORM       PLATFORM_EMB_ZRF212
+#define __EMB_ZRF212__
 #define HARWARE_REVISION ATXMEGA256a3
 #ifndef F_CPU
 #define F_CPU          32768000UL
@@ -64,7 +65,7 @@ void clock_wait(int ms10);
 void clock_set_seconds(unsigned long s);
 unsigned long clock_seconds(void);
 
-/*define to setup system clock (32,768 external clock)*/
+/*define to setup system clock*/
 //#define __SYSTEM_CLOCK_SETUP__
 
 /* Maximum timer interval for 16 bit clock_time_t */
@@ -77,14 +78,8 @@ unsigned long clock_seconds(void);
 #define RIME_CONF_BROADCAST_ANNOUNCEMENT_MAX_TIME CLOCK_CONF_SECOND * 524UL /* Default uses 600UL */
 #define COLLECT_CONF_BROADCAST_ANNOUNCEMENT_MAX_TIME CLOCK_CONF_SECOND * 524UL /* Default uses 600UL */
 
-/* Michael Hartman's atmega128rfa1 board has an external 32768Hz crystal connected to TOSC1 and 2 pins similar to the Raven 1284p */
-/* and theoretically can use TIMER2 with it to keep time. Else TIMER0 is used. */
-/* The sleep timer in raven-lcd.c also uses the crystal and adds a TIMER2 interrupt routine if not already define by clock.c */
-/* This has not been tested yet */
-#define AVR_CONF_USE32KCRYSTAL 0
-
 /*==== LEDS ===*/
-#define __USE_LEDS__ 1
+#define __USE_LEDS__ 
 #define LEDPORT PORTB
 #define LEDS_CONF_ALL 0x0f
 #define LED1_bm (1<<0)

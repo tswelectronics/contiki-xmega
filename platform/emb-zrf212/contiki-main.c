@@ -36,6 +36,9 @@
 #include "contiki.h"
 #include "contiki-net.h"
 #include "contiki-lib.h"
+
+#include "dev/leds.h"
+
 /*-------------------------Low level initialization------------------------*/
 /*------Done in a subroutine to keep main routine stack usage small--------*/
 void initialize(void)
@@ -46,7 +49,7 @@ void initialize(void)
 #endif /* __SYSTEM_CLOCK_SETUP__*/
 	clock_init();
 
-#if definied(__USE_LEDS__)
+#if defined(__USE_LEDS__)
 	/*--- Setup led module -- */
 	leds_init();
 #endif /* __USE_LEDS__ */
@@ -65,8 +68,7 @@ main(void)
 
 	while (1){
 		process_run();
-
-		watchdog_periodic();
+		//watchdog_periodic();
 	}
 
 	return 0;
