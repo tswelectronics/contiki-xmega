@@ -1,10 +1,10 @@
-CONTIKI_TARGET_DIRS = . apps net loader
+CONTIKI_TARGET_DIRS = . #apps net loader
 
 CONTIKI_CORE=contiki-main
 CONTIKI_TARGET_MAIN = ${CONTIKI_CORE}.o
 CONTIKI_TARGET_SOURCEFILES += contiki-main.c
 #Needed for slip
-CONTIKI_TARGET_SOURCEFILES += button-sensor.c sensors.c slip_uart0.c slip.c
+#CONTIKI_TARGET_SOURCEFILES += button-sensor.c sensors.c slip_uart0.c slip.c
 
 CONTIKIAVR=$(CONTIKI)/cpu/avr
 CONTIKIBOARD=.
@@ -28,5 +28,5 @@ AVRDUDE_PORT=/dev/ttyUSB0
 AVRDUDE_OPTIONS=-V
 
 
-include $(CONTIKIAVR)/Makefile.avr
-include $(CONTIKIAVR)/radio/Makefile.radio
+include $(CONTIKIAVR)/Makefile.avr_emb
+#include $(CONTIKIAVR)/radio/Makefile.radio
