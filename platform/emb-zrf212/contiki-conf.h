@@ -91,8 +91,10 @@ unsigned long clock_seconds(void);
 #define LED4_bm (1<<3)
 #define LED4_bp 3
 
-/* COM port to be used for SLIP connection. Not tested on Raven */
-#define SLIP_PORT RS232_PORT_0
+/*=== RS232 ===*/
+#define RS232_PORT_0 USARTd0
+/* COM port to be used for SLIP connection.*/
+#define SLIP_PORT RS232_PORT_0 /*XXX Don't Know.. set it to RS232 Port!*/
 
 /* Pre-allocated memory for loadable modules heap space (in bytes)*/
 /* Default is 4096. Currently used only when elfloader is present. Not tested on Raven */

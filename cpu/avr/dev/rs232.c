@@ -172,7 +172,7 @@ ISR(USART1_RX_vect)
     rs232_ports[RS232_PORT_0].input_handler(c);
   }
 }
-#elif defined (__AVR_ATxmega256a3__)
+#elif defined (__AVR_ATxmega256A3__)
 	/* The Xmega header file already contains the USART_t 
 	 * type definitio*/
 
@@ -261,9 +261,8 @@ static rs232_t rs232_ports[8] = {
 };
 
 /*-- interrupt level HIGH for transmit, empty and receive --*/
-USART_INTERRUPT_DATA_REG_EMPTY = USART_DREINTLVL_HI_gc; 
-USART_INTERRUPT_RX_COMPLETE = USART_RXCINTLVL_HI_gc;
-USART_INTERRUPT_TX_COMPLETE = USART_TXCINTLVL_HI_gc;
+USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = USART_RXCINTLVL_HI_gc;
+USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE = USART_TXCINTLVL_HI_gc;
 
 /*=== Interrupt Routines ===*/
 /*--USARTC0------------------------------------------------------------------*/
@@ -384,6 +383,7 @@ ISR(USARTF0_RXC_vect)
   }
 }
 
+#if 0
 /*---USARTF1-----------------------------------------------------------------*/
 ISR(USARTF1_TXC_vect)
 {
@@ -400,6 +400,7 @@ ISR(USARTF1_RXC_vect)
     rs232_ports[USARTf1].input_handler(c);
   }
 }
+#endif /*#if 0*/
 
 #else
 #error Please define the UART registers for your MCU!
@@ -409,24 +410,23 @@ ISR(USARTF1_RXC_vect)
 void
 rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
 {
-	rs232_t *rs232 = rs232_ports[port];
+	rs232_t *rs232 = &rs232_ports[port];
 
 	/*
 	 * Setup baudrate
 	 */
-  *(rs232).BAUDH = (uint8_t)(bd>>8);
-  *(rs232).BAUDL = (uint8_t)bd;
+  (*(*rs232).BAUDH) = (uint8_t)(bd>>8);
+  (*(*rs232).BAUDL) = (uint8_t)bd;
 
   /*
    * - Enable receiver and transmitter,
    * - Enable interrupts for receiver and transmitter
 	 *   (high priority interrupts for xmega)
    */
-	*(rs232).FUNCTION |= 
+	(*(*rs232).FUNCTION) |= 
 					USART_RECEIVER_ENABLE |
 					USART_TRANSMITTER_ENABLE;
-	*(rs232).INTERRUPT|= 
-					USART_INTERRUPT_DATA_REG_EMPTY |
+	(*(*rs232).INTERRUPT) |= 
 	 				USART_INTERRUPT_RX_COMPLETE |
 					USART_INTERRUPT_TX_COMPLETE;
 
@@ -437,10 +437,10 @@ rs232_init (uint8_t port, uint8_t bd, uint8_t ffmt)
    * - charater size (9 bits are currently not supported)
    * - clock polarity
    */
-	*(rs232).FORMAT = ffmt;
+	(*(*rs232).FORMAT) = ffmt;
 
-  *(rs232).txwait = 0;
-  *(rs232).input_handler = NULL;
+  (*rs232).txwait = 0;
+  (*rs232).input_handler = NULL;
 }
 
 void
