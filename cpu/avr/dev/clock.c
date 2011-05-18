@@ -120,7 +120,7 @@ system_clock_init()
 	sei();
 }
 #endif
-#endif /* __AVR_ATxmega256a3 && __SYSTEM_CLOCK_SETUP__*/
+#endif /* __AVR_ATxmega256A3 && __SYSTEM_CLOCK_SETUP__*/
 
 void
 clock_init(void)
