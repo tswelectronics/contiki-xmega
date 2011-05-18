@@ -48,34 +48,28 @@
 void
 leds_arch_init(void)
 {
-#if defined(__AVR__ATxmega256a3__) && defined(__USE_LEDS__)
-	LEDPORT.DIRSET |= LED1_bm | LED2_bm | LED3_bm | LED4_bm;
-#endif /*AVR_ATxmega256a3 && __USE_LEDS__ */
+#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
+	LEDPORT.DIRSET |= LEDS_CONF_ALL;
+#endif /*AVR_ATxmega256A3 && __USE_LEDS__ */
 }
 /*---------------------------------------------------------------------------*/
 unsigned char
 leds_arch_get(void)
 {
 	unsigned char leds=0;
-#if defined(__AVR_ATxmega256a3__) && defined(__USE_LEDS__)
+#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
 	leds = (unsigned char) LEDPORT.OUTSET & LEDS_ALL;
-#endif/*AVR_ATxmega256a3 && __USE_LEDS__ */
+#endif/*AVR_ATxmega256A3 && __USE_LEDS__ */
 	return leds;
 }
 /*---------------------------------------------------------------------------*/
 void
 leds_arch_set(unsigned char leds)
 {
-#if defined(__AVR_ATxmega256a3__) && defined(__USE_LEDS__)
-	if (leds & LED1_bm)
-		LEDPORT.OUTSET |= LED1_bm;
-	if (leds & LED2_bm)
-		LEDPORT.OUTSET |= LED2_bm;
-	if (leds & LED3_bm)
-		LEDPORT.OUTSET |= LED3_bm;
-	if (leds & LED4_bm)
-		LEDPORT.OUTSET |= LED4_bm;
-#endif /*AVR_ATxmega256a3 && __USE_LEDS__ */
+#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
+	LEDPORT.OUTSET = (leds&LEDS_CONF_ALL);
+	LEDPORT.OUTCLR = ((~leds)&LEDS_CONF_ALL);
+#endif /*AVR_ATxmega256A3 && __USE_LEDS__ */
 
 
 }
