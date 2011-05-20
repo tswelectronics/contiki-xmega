@@ -50,6 +50,7 @@
 #define F_CPU          32768000UL
 #endif
 #include <stdint.h>
+#include <avr/io.h>
 
 
 typedef int32_t s32_t;
