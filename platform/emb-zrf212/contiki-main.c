@@ -49,7 +49,6 @@
 /*-------------------------Low level initialization------------------------*/
 void initialize_lowlevel(void)
 {
-
 	/*
 	 * --- USART DATA ---
 	 * baud, parity, chsize, stop bit and communication mode

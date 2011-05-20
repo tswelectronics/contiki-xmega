@@ -23,7 +23,7 @@ CONTIKI_CPU=$(CONTIKI)/cpu/avr
 ### These directories will be searched for the specified source files
 ### TARGETLIBS are platform-specific routines in the contiki library path
 CONTIKI_CPU_DIRS            = . dev
-AVR        = clock.c leds-arch.c rs232.c
+AVR        = clock.c leds-arch.c rs232.c interrupt.c #bootloader.c watchdog.c
 ELFLOADER  = elfloader.c elfloader-avr.c symtab-avr.c
 TARGETLIBS = leds.c #random.c leds.c
 
@@ -41,7 +41,7 @@ CC       = avr-gcc
 LD       = avr-gcc
 AS       = avr-as
 AR       = avr-ar
-OBJCOPY  = avr-objcopy
+OBJCOPY  = /usr/local/avr/bin/avr-objcopy
 STRIP    = avr-strip
 CFLAGSNO = -Wall -mmcu=$(MCU) -gdwarf-2 \
            -I. -I$(CONTIKI)/core -I$(CONTIKI_CPU) $(USB_INCLUDES) \
