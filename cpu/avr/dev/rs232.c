@@ -248,8 +248,10 @@ static rs232_t rs232_ports[8] = {
 };
 
 /*-- interrupt level HIGH for transmit, empty and receive --*/
-USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = USART_RXCINTLVL_HI_gc;
-USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE = USART_TXCINTLVL_HI_gc;
+USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = 
+						USART_RXCINTLVL_HI_gc;
+USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE =
+						USART_TXCINTLVL_HI_gc;
 
 /*=== Interrupt Routines ===*/
 /*--USARTC0------------------------------------------------------------------*/
@@ -414,8 +416,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
   /* - Enable interrupts for receiver and transmitter
 	 *   (high priority interrupts for xmega)
    */
-	*(rs232).INTERRUPT|= 
-					USART_INTERRUPT_DATA_REG_EMPTY |
+	(*(*rs232).INTERRUPT) |= 
 	 				USART_INTERRUPT_RX_COMPLETE |
 					USART_INTERRUPT_TX_COMPLETE;
 

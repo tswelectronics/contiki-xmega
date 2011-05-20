@@ -30,8 +30,23 @@
  *
  */
 
+/*
+ * \file 
+ * 				Main Loop for Contiki OS on EMB-ZRF212 plat.
+ * 				This Module initialize low-level
+ * 				subsystems and starts main loop, where auto-start
+ * 				processes are launched and event dispatched
+ *
+ * \author
+ * 				jacopo mondi <mondi@cs.unibo.it>
+ */
 #include <stdio.h>
 #include <string.h>
+#include <util/delay.h>
+
+#include "lib/mmem.h"
+#include "loader/symbols-def.h"
+#include "loader/symtab.h"
 
 #include "contiki.h"
 #include "contiki-net.h"
@@ -39,31 +54,48 @@
 
 #include "dev/leds.h"
 #include "dev/rs232.h"
+#include "interrupt.h"
 
 /*-------------------------Low level initialization------------------------*/
-/*------Done in a subroutine to keep main routine stack usage small--------*/
-void initialize(void)
+void initialize_lowlevel(void)
 {
+	/* --- USART DATA ---
+	 * baud, parity, chsize, stop bit and communication mode*/
 	uint16_t baud=212; /*baud 9600 @32760 KHz*/
 	USART_CHSIZE_t chsize = USART_CHSIZE_8BIT_gc;
-	USART_PMODE_t pmode = USART_CMODE_ASYNCHRONOUS_gc;
-	USART_CMODE_t cmode = USART_PMODE_DISABLED_gc;
+	USART_PMODE_t cmode = USART_CMODE_ASYNCHRONOUS_gc;
+	USART_CMODE_t pmode = USART_PMODE_DISABLED_gc;
 	USART_SMODE_t smode = USART_SMODE_1BIT_gc;
+	/* --- INTERRUPT DATA ---
+	 * enable 3 level interrupt management (high, med and low)*/
+	PMIC_CTRL_INTLVL_t int_level = PMIC_CTRL_HML_gm;
+
+	/*
+	 *  --- Initialize Low-Level --- 
+	 */
+
+	/*--- Setup led module -- */
+#if defined(__USE_LEDS__)
+	leds_init();
+	leds_on(0x01);
+	leds_off(0x01);
+#endif /* __USE_LEDS__ */
+
+	/*setup and configure global interrupts*/
+	interrupt_init(int_level);
+
 	/*--- Setup system clock (if required) and start timer */
 #if defined(__SYSTEM_CLOCK_SETUP__)
 	system_clock_init();
 #endif /* __SYSTEM_CLOCK_SETUP__*/
 	clock_init();
 
-#if defined(__USE_LEDS__)
-	/*--- Setup led module -- */
-	leds_init();
-#endif /* __USE_LEDS__ */
-
 	/*setup serial port on USARTD0*/
 	rs232_init(RS232_PORT_0, baud, 
 			(chsize | pmode | cmode | smode) );
 
+	/* start global interrupt  vector*/
+	interrupt_start();
 	return;
 
 }
@@ -74,10 +106,28 @@ int
 main(void)
 {
 	/*--- Setup platform and cpu specific subsystems ---*/
-	initialize();
+	initialize_lowlevel();
 
+//	leds_init();
+//	clock_init();
+	
+
+//	leds_on(0x03);
+//	leds_off(0x03);
+//	process_start(&etimer_process, NULL);
+//	ctimer_init();
+
+	//autostart_start(autostart_processes);
 	while (1){
-		process_run();
+		;
+
+//		leds_on(0x03);
+//		clock_wait(10);
+//		_delay_ms(100);
+//		leds_off(0x03);
+//		_delay_ms(100);
+//		clock_wait(10);
+		//process_run();
 		//watchdog_periodic();
 	}
 

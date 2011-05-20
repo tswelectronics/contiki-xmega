@@ -148,7 +148,7 @@
   TIMSK0 = _BV (OCIE0A);
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
-#elif  defined __AVR_ATxmega256A3__
+#elif  defined(__AVR_ATxmega256A3__)
 /*--- setup Timer/Counter 0 for system time ---*/
 /* use Timer/Counter 0 from timing*/
 #define TIMER TCC0
@@ -176,4 +176,25 @@
 #error "Setup CPU in clock-avr.h"
 #endif
 
+#if defined __SYSTEM_CLOCK_SETUP__
+#if defined(__EMB_ZRF212__)/*Main clock is platform specific*/
+/*pointer to Timer/Counter0*/
+#define MAIN_CLK  CLK
+/*signature for CCP register*/
+#define CCP_IOREG 0xD8
+/*Setup whole system clock (CLKcpu and CLKper)*/
+#define CLOCKSetup() \
+	/*external oscillator or clock*/ \
+	MAIN_CLK.CTRL |=  CLK_SCLKSEL0_bm |  CLK_SCLKSEL1_bm; 
+
+/* lock the clock settings until next restart*/
+#define CLOCKLock() \
+	CPU_CCP = 0xD8; \
+\
+	MAIN_CLK.LOCK | CLK_LOCK_bm; 
+#else /*define platform specific system clock startup here*/
+#error "define xmega platform here"
+#endif /*EMB-ZRF212*/
+
+#endif /*__SYSTEM_CLOCK_SETUP__)*/
 #endif //CONTIKI_CLOCK_AVR_H
