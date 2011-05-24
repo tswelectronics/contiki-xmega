@@ -30,6 +30,16 @@
  *
  */
 
+/*
+ * \file 
+ * 				Main Loop for Contiki OS on EMB-ZRF212 plat.
+ * 				This Module initialize low-level
+ * 				subsystems and starts main loop, where auto-start
+ * 				processes are launched and event dispatched
+ *
+ * \author
+ * 				jacopo mondi <mondi@cs.unibo.it>
+ */
 #include <stdio.h>
 #include <string.h>
 #include <util/delay.h>
@@ -49,24 +59,23 @@
 /*-------------------------Low level initialization------------------------*/
 void initialize_lowlevel(void)
 {
-
-	/*
-	 * --- USART DATA ---
-	 * baud, parity, chsize, stop bit and communication mode
-	 */
+	/* --- USART DATA ---
+	 * baud, parity, chsize, stop bit and communication mode*/
 	uint16_t baud=212; /*baud 9600 @32760 KHz*/
 	USART_CHSIZE_t chsize = USART_CHSIZE_8BIT_gc;
 	USART_PMODE_t cmode = USART_CMODE_ASYNCHRONOUS_gc;
 	USART_CMODE_t pmode = USART_PMODE_DISABLED_gc;
 	USART_SMODE_t smode = USART_SMODE_1BIT_gc;
-	/*
-	 * --- INTERRUPT DATA ---
-	 * enable 3 level interrupt management (high, med and low)
-	 */
+	/* --- INTERRUPT DATA ---
+	 * enable 3 level interrupt management (high, med and low)*/
 	PMIC_CTRL_INTLVL_t int_level = PMIC_CTRL_HML_gm;
 
-#if defined(__USE_LEDS__)
+	/*
+	 *  --- Initialize Low-Level --- 
+	 */
+
 	/*--- Setup led module -- */
+#if defined(__USE_LEDS__)
 	leds_init();
 	leds_on(0x01);
 	leds_off(0x01);
