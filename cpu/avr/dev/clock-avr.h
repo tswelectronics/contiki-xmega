@@ -148,7 +148,7 @@
   TIMSK0 = _BV (OCIE0A);
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
-#elif  defined __AVR_ATxmega256A3__
+#elif  defined(__AVR_ATxmega256A3__)
 /*--- setup Timer/Counter 0 for system time ---*/
 /* use Timer/Counter 0 from timing*/
 #define TIMER TCC0
@@ -177,7 +177,7 @@
 #endif
 
 #if defined __SYSTEM_CLOCK_SETUP__
-#if defined(__EMB_ZRF212__)
+#if defined(__EMB_ZRF212__)/*Main clock is platform specific*/
 /*pointer to Timer/Counter0*/
 #define MAIN_CLK  CLK
 /*signature for CCP register*/
