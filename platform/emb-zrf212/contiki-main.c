@@ -74,15 +74,15 @@ void initialize_lowlevel(void)
 	 *  --- Initialize Low-Level --- 
 	 */
 
-	/*--- Setup led module -- */
+	/*setup and configure global interrupts*/
+	interrupt_init(int_level);
+/*- Setup led module -- */
 #if defined(__USE_LEDS__)
 	leds_init();
 	leds_on(0x01);
 	leds_off(0x01);
 #endif /* __USE_LEDS__ */
 
-	/*setup and configure global interrupts*/
-	interrupt_init(int_level);
 
 	/*--- Setup system clock (if required) and start timer */
 #if defined(__SYSTEM_CLOCK_SETUP__)
@@ -93,9 +93,17 @@ void initialize_lowlevel(void)
 	/*setup serial port on USARTD0*/
 	rs232_init(RS232_PORT_0, baud, 
 			(chsize | pmode | cmode | smode) );
+	rs232_print(RS232_PORT_0, "Setup Serial Channel\n\0");
+
+	rs232_print(RS232_PORT_0, "Setup LED module\n\0");
 
 	/* start global interrupt  vector*/
 	interrupt_start();
+	rs232_print(RS232_PORT_0, "Startup global interrupt vector\n\0");
+	rs232_print(RS232_PORT_0, "BOOTING CONTIKI OS...\n\0");
+	clock_wait(70);
+	rs232_print(RS232_PORT_0, "DONE\n\0");
+
 	return;
 
 }
@@ -121,12 +129,11 @@ main(void)
 	while (1){
 		;
 
-//		leds_on(0x03);
-//		clock_wait(10);
-//		_delay_ms(100);
-//		leds_off(0x03);
-//		_delay_ms(100);
-//		clock_wait(10);
+		leds_on(0x01);
+		clock_wait(125);
+		leds_off(0x01);
+		clock_wait(125);
+		rs232_print(RS232_PORT_0,"A led is blinking... we are alive and well\n\0"); 
 		//process_run();
 		//watchdog_periodic();
 	}

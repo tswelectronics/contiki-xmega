@@ -23,7 +23,7 @@ CONTIKI_CPU=$(CONTIKI)/cpu/avr
 ### These directories will be searched for the specified source files
 ### TARGETLIBS are platform-specific routines in the contiki library path
 CONTIKI_CPU_DIRS            = . dev
-AVR        = clock.c leds-arch.c rs232.c
+AVR        = clock.c leds-arch.c rs232.c interrupt.c
 ELFLOADER  = elfloader.c elfloader-avr.c symtab-avr.c
 TARGETLIBS = leds.c #random.c leds.c
 
@@ -37,12 +37,12 @@ CONTIKI_SOURCEFILES        += $(CONTIKI_TARGET_SOURCEFILES)
 
 
 ### Compiler definitions
-CC       = avr-gcc
-LD       = avr-gcc
-AS       = avr-as
-AR       = avr-ar
-OBJCOPY  = avr-objcopy
-STRIP    = avr-strip
+CC       = /usr/local/avr/bin/avr-gcc
+LD       = /usr/local/avr/bin/avr-gcc
+AS       = /usr/local/avr/bin/avr-as
+AR       = /usr/local/avr/bin/avr-ar
+OBJCOPY  = /usr/local/avr/bin/avr-objcopy
+STRIP    = /usr/local/avr/bin/avr-strip
 CFLAGSNO = -Wall -mmcu=$(MCU) -gdwarf-2 \
            -I. -I$(CONTIKI)/core -I$(CONTIKI_CPU) $(USB_INCLUDES) \
            -I$(CONTIKI)/platform/$(TARGET) \
@@ -132,7 +132,7 @@ endif
 
 ### Upload image
 %.u: %.hex
-	avrdude ${AVRDUDE_OPTIONS} -P ${AVRDUDE_PORT} -c ${AVRDUDE_PROGRAMMER} -p ${MCU} -U flash:w:$<
+	avrdude ${AVRDUDE_OPTIONS} -P ${AVRDUDE_PORT} -c ${AVRDUDE_PROGRAMMER} -p ${MCU} -b115200 -U flash:w:$<
 
 symbols.c:
 	cp ${CONTIKI}/tools/empty-symbols.c symbols.c
