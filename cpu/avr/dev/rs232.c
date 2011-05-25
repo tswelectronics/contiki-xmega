@@ -42,6 +42,8 @@
 #include "dev/slip.h"
 #include "dev/rs232.h"
 
+#include "leds.h"
+
 #ifdef RS232_CONF_PRINTF_BUFFER_LENGTH
 #define RS232_PRINTF_BUFFER_LENGTH RS232_CONF_PRINTF_BUFFER_LENGTH
 #else
@@ -161,13 +163,13 @@ ISR(USART1_RX_vect)
 }
 #elif defined (__AVR_ATxmega256A3__)
 	/* The Xmega header file already contains the USART_t 
-	 * type definitio*/
+	 * type definition*/
 
 static rs232_t rs232_ports[8] = {
 	{
 		&USARTC0.DATA,
-		&USARTC0.BAUDCTRLA,
 		&USARTC0.BAUDCTRLB,
+		&USARTC0.BAUDCTRLA,
 		&USARTC0.CTRLB,
 		&USARTC0.CTRLA,
 		&USARTC0.CTRLC,
@@ -176,8 +178,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTC1.DATA,
-		&USARTC1.BAUDCTRLA,
 		&USARTC1.BAUDCTRLB,
+		&USARTC1.BAUDCTRLA,
 		&USARTC1.CTRLB,
 		&USARTC1.CTRLA,
 		&USARTC1.CTRLC,
@@ -186,8 +188,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTD0.DATA,
-		&USARTD0.BAUDCTRLA,
 		&USARTD0.BAUDCTRLB,
+		&USARTD0.BAUDCTRLA,
 		&USARTD0.CTRLB,
 		&USARTD0.CTRLA,
 		&USARTD0.CTRLC,
@@ -196,8 +198,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTD1.DATA,
-		&USARTD1.BAUDCTRLA,
 		&USARTD1.BAUDCTRLB,
+		&USARTD1.BAUDCTRLA,
 		&USARTD1.CTRLB,
 		&USARTD1.CTRLA,
 		&USARTD1.CTRLC,
@@ -206,8 +208,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTE0.DATA,
-		&USARTE0.BAUDCTRLA,
 		&USARTE0.BAUDCTRLB,
+		&USARTE0.BAUDCTRLA,
 		&USARTE0.CTRLB,
 		&USARTE0.CTRLA,
 		&USARTE0.CTRLC,
@@ -216,8 +218,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTE1.DATA,
-		&USARTE1.BAUDCTRLA,
 		&USARTE1.BAUDCTRLB,
+		&USARTE1.BAUDCTRLA,
 		&USARTE1.CTRLB,
 		&USARTE1.CTRLA,
 		&USARTE1.CTRLC,
@@ -227,8 +229,8 @@ static rs232_t rs232_ports[8] = {
 
 	{
 		&USARTF0.DATA,
-		&USARTF0.BAUDCTRLA,
 		&USARTF0.BAUDCTRLB,
+		&USARTF0.BAUDCTRLA,
 		&USARTF0.CTRLB,
 		&USARTF0.CTRLA,
 		&USARTF0.CTRLC,
@@ -237,8 +239,8 @@ static rs232_t rs232_ports[8] = {
 	},
 	{
 		&USARTF1.DATA,
-		&USARTF1.BAUDCTRLA,
 		&USARTF1.BAUDCTRLB,
+		&USARTF1.BAUDCTRLA,
 		&USARTF1.CTRLB,
 		&USARTF1.CTRLA,
 		&USARTF1.CTRLC,
@@ -401,10 +403,38 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 {
 	rs232_t *rs232 = &rs232_ports[port];
 
+#if defined (__AVR_ATxmega256A3__)
+	/* 
+	 * we need same index for even and odd 
+	 * port numbers, so we clear the LSB.
+	 * This number must then be divide by 2 to get the distance
+	 * (in USART_PORT_OFFSET) from first USART
+	 * port (BASE_USART_PORT)
+	 */
+	uint8_t port_index = ((port&0xfe)/2);
+	PORT_t *USART_port = (PORT_t *) (BASE_USART_PORT + 
+									 			(USART_PORT_OFFSET*port_index));
+	/*
+	 * We need to set TX pin as output, and set it 
+	 * high before setting direction.
+	 * Rx pin is input
+	 */
+	if (port&0x01){
+		USART_port->OUT |= USARTn1_TXD_bm;
+		USART_port->DIR |= USARTn1_TXD_bm;
+		USART_port->DIRCLR = USARTn1_RXD_bm;
+	}else{
+		USART_port->OUT |= USARTn0_TXD_bm;
+		USART_port->DIR |= USARTn0_TXD_bm;
+		USART_port->DIRCLR = USARTn0_RXD_bm;
+	}
+#endif /*__AVR_ATxmega256A3__*/
+
 	/*
 	 * Setup baudrate
 	 */
-  (*(*rs232).BAUDH) = (uint8_t)(bd>>8);
+	(*(*rs232).BAUDH) &= 0xff00;/*clear 4 LSB*/
+  (*(*rs232).BAUDH) |= (uint8_t)(0x00ff & (bd>>8));
   (*(*rs232).BAUDL) = (uint8_t)bd;
 
   /*
@@ -413,6 +443,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 	(*(*rs232).FUNCTION) |= 
 					USART_RECEIVER_ENABLE |
 					USART_TRANSMITTER_ENABLE;
+
   /* - Enable interrupts for receiver and transmitter
 	 *   (high priority interrupts for xmega)
    */
@@ -426,9 +457,10 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
    * - Stop bits
    * - charater size (9 bits are currently not supported)
    * - clock polarity
-   */
+  */
 	(*(*rs232).FORMAT) = ffmt;
 
+	/*setup flag and input handler*/
   (*rs232).txwait = 0;
   (*rs232).input_handler = NULL;
 }
@@ -472,8 +504,8 @@ void
 rs232_send(uint8_t port, unsigned char c)
 {
   rs232_ports[port].txwait = 1;
-  *(rs232_ports[port].UDR) = c;
-  while(rs232_ports[port].txwait);
+  *(rs232_ports[port].DATA) = c;
+	while(rs232_ports[port].txwait);
 }
 /*---------------------------------------------------------------------------*/
 void
