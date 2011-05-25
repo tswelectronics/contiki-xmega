@@ -54,6 +54,8 @@
 #include "dev/slip.h"
 #include "dev/rs232.h"
 
+#include "leds.h"
+
 #ifdef RS232_CONF_PRINTF_BUFFER_LENGTH
 #define RS232_PRINTF_BUFFER_LENGTH RS232_CONF_PRINTF_BUFFER_LENGTH
 #else
@@ -414,7 +416,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 {
 	rs232_t *rs232 = &rs232_ports[port];
 
-#if defined(__AVR_ATxmega256A3__)
+#if defined (__AVR_ATxmega256A3__)
 	/* 
 	 * we need same index for even and odd 
 	 * port numbers, so we clear the LSB.
@@ -423,22 +425,21 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 	 * port (BASE_USART_PORT)
 	 */
 	uint8_t port_index = ((port&0xfe)/2);
-	PORT_t *USART_port = (PORT_t *) BASE_USART_PORT + 
-												(USART_PORT_OFFSET*port_index);
-
+	PORT_t *USART_port = (PORT_t *) (BASE_USART_PORT + 
+									 			(USART_PORT_OFFSET*port_index));
 	/*
 	 * We need to set TX pin as output, and set it 
 	 * high before setting direction.
 	 * Rx pin is input
 	 */
-	if (! port&0x01){
-		USART_port->OUTSET |= USARTn0_TXD_bm;
-		USART_port->DIRSET |= USARTn0_TXD_bm;
-		USART_port->DIRCLR |= USARTn0_RXD_bm;
+	if (port&0x01){
+		USART_port->OUT |= USARTn1_TXD_bm;
+		USART_port->DIR |= USARTn1_TXD_bm;
+		USART_port->DIRCLR = USARTn1_RXD_bm;
 	}else{
-		USART_port->OUTSET |= USARTn1_TXD_bm;
-		USART_port->DIRSET |= USARTn1_TXD_bm;
-		USART_port->DIRCLR |= USARTn1_RXD_bm;
+		USART_port->OUT |= USARTn0_TXD_bm;
+		USART_port->DIR |= USARTn0_TXD_bm;
+		USART_port->DIRCLR = USARTn0_RXD_bm;
 	}
 #endif /*__AVR_ATxmega256A3__*/
 
@@ -471,7 +472,6 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
    * - clock polarity
   */
 	(*(*rs232).FORMAT) = ffmt;
-
 
 	/*setup flag and input handler*/
   (*rs232).txwait = 0;

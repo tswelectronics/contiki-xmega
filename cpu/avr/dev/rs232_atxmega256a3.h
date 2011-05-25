@@ -62,7 +62,8 @@
 /******************************************************************************/
 /***   PORTS OFFSETS																													*/		
 /******************************************************************************/
-#define BASE_USART_PORT   0x0640 /*this is PORTC*/
+/*this is PORTC, the first port with USART*/
+#define BASE_USART_PORT   0x0640
 #define USART_PORT_OFFSET 0x0020
 #define USARTn0_TXD_bm (1<<3)
 #define USARTn0_RXD_bm (1<<2)
