@@ -50,15 +50,24 @@
 /******************************************************************************/
 /***   USART ports                                                            */
 /******************************************************************************/
-#define USARTc0  0
-#define USARTc1  1
-#define USARTd0  2
-#define USARTd1  3
-#define USARTe0  4
-#define USARTe1  5
-#define USARTf0  6
-#define USARTf1  7
+#define USARTc0  0x00
+#define USARTc1  0x01
+#define USARTd0  0x02
+#define USARTd1  0x03
+#define USARTe0  0x04
+#define USARTe1  0x05
+#define USARTf0  0x06
+#define USARTf1  0x07
 
+/******************************************************************************/
+/***   PORTS OFFSETS																													*/		
+/******************************************************************************/
+#define BASE_USART_PORT   0x0640 /*this is PORTC*/
+#define USART_PORT_OFFSET 0x0020
+#define USARTn0_TXD_bm (1<<3)
+#define USARTn0_RXD_bm (1<<2)
+#define USARTn1_TXD_bm (1<<7)
+#define USARTn1_RXD_bm (1<<6)
 //XXX MISSING BAUDRATES
 
 /******************************************************************************/
@@ -71,7 +80,7 @@
 /***   Receiver / transmitter                                                 */
 /******************************************************************************/
 #define USART_RECEIVER_ENABLE USART_RXEN_bm
-#define USART_TRANSMITTER_ENABLE USART_RXEN_bm
+#define USART_TRANSMITTER_ENABLE USART_TXEN_bm
 
 /******************************************************************************/
 /***   Mode select                                                            */
