@@ -17,7 +17,8 @@
 void 
 interrupt_init(PMIC_CTRL_INTLVL_t int_level)
 {
-#if defined(__AVR_ATxmega256A3__)
+//if we have an XMEGA
+#if defined(PMIC_CTRL)
 	uint8_t temp;
 	/* 
 	 * Setup here interrupt enabled interrupt

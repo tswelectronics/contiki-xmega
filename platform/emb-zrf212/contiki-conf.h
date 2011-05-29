@@ -93,7 +93,7 @@ unsigned long clock_seconds(void);
 #define LED4_bp 3
 
 /*=== RS232 ===*/
-#define RS232_PORT_0 USARTd0
+#define RS232_PORT_0 RS232_USARTD0
 /* COM port to be used for SLIP connection.*/
 #define SLIP_PORT RS232_PORT_0 /*XXX Don't Know.. set it to RS232 Port!*/
 
