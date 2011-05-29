@@ -177,236 +177,163 @@ ISR(USART1_RX_vect)
 #elif defined (__AVR_ATxmega256A3__)
 	/* The Xmega header file already contains the USART_t 
 	 * type definition*/
+  /* check if we have some type of Xmega, as they should all have the same
+   * serial hardware in the same places.
+   */
+#elif defined (__RS232_ATXMEGA__)
+//#elif defined (__AVR_ATxmega256A3__)
+  /* The Xmega header file already contains the USART_t
+   * type definitio*/
+  #define XMEGA_SERIAL_PORT_COUNT 0
 
-static rs232_t rs232_ports[8] = {
-	{
-		&USARTC0.DATA,
-		&USARTC0.BAUDCTRLB,
-		&USARTC0.BAUDCTRLA,
-		&USARTC0.CTRLB,
-		&USARTC0.CTRLA,
-		&USARTC0.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTC1.DATA,
-		&USARTC1.BAUDCTRLB,
-		&USARTC1.BAUDCTRLA,
-		&USARTC1.CTRLB,
-		&USARTC1.CTRLA,
-		&USARTC1.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTD0.DATA,
-		&USARTD0.BAUDCTRLB,
-		&USARTD0.BAUDCTRLA,
-		&USARTD0.CTRLB,
-		&USARTD0.CTRLA,
-		&USARTD0.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTD1.DATA,
-		&USARTD1.BAUDCTRLB,
-		&USARTD1.BAUDCTRLA,
-		&USARTD1.CTRLB,
-		&USARTD1.CTRLA,
-		&USARTD1.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTE0.DATA,
-		&USARTE0.BAUDCTRLB,
-		&USARTE0.BAUDCTRLA,
-		&USARTE0.CTRLB,
-		&USARTE0.CTRLA,
-		&USARTE0.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTE1.DATA,
-		&USARTE1.BAUDCTRLB,
-		&USARTE1.BAUDCTRLA,
-		&USARTE1.CTRLB,
-		&USARTE1.CTRLA,
-		&USARTE1.CTRLC,
-		0,
-		NULL
-	},
+  static rs232_t rs232_ports[] = {
 
-	{
-		&USARTF0.DATA,
-		&USARTF0.BAUDCTRLB,
-		&USARTF0.BAUDCTRLA,
-		&USARTF0.CTRLB,
-		&USARTF0.CTRLA,
-		&USARTF0.CTRLC,
-		0,
-		NULL
-	},
-	{
-		&USARTF1.DATA,
-		&USARTF1.BAUDCTRLB,
-		&USARTF1.BAUDCTRLA,
-		&USARTF1.CTRLB,
-		&USARTF1.CTRLA,
-		&USARTF1.CTRLC,
-		0,
-		NULL
-	},
+  #if defined(RS232_0)
+  {
+    &RS232_0.DATA,
+    &RS232_0.BAUDCTRLB,
+    &RS232_0.BAUDCTRLA,
+    &RS232_0.CTRLB,
+    &RS232_0.CTRLA,
+    &RS232_0.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+
+  #if defined(RS232_1)
+  {
+    &RS232_1.DATA,
+    &RS232_1.BAUDCTRLB,
+    &RS232_1.BAUDCTRLA,
+    &RS232_1.CTRLB,
+    &RS232_1.CTRLA,
+    &RS232_1.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_2)
+  {
+    &RS232_2.DATA,
+    &RS232_2.BAUDCTRLB,
+    &RS232_2.BAUDCTRLA,
+    &RS232_2.CTRLB,
+    &RS232_2.CTRLA,
+    &RS232_2.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_3)
+  {
+    &RS232_3.DATA,
+    &RS232_3.BAUDCTRLB,
+    &RS232_3.BAUDCTRLA,
+    &RS232_3.CTRLB,
+    &RS232_3.CTRLA,
+    &RS232_3.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_4)
+  {
+    &RS232_4.DATA,
+    &RS232_4.BAUDCTRLB,
+    &RS232_4.BAUDCTRLA,
+    &RS232_4.CTRLB,
+    &RS232_4.CTRLA,
+    &RS232_4.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_5)
+  {
+    &RS232_5.DATA,
+    &RS232_5.BAUDCTRLB,
+    &RS232_5.BAUDCTRLA,
+    &RS232_5.CTRLB,
+    &RS232_5.CTRLA,
+    &RS232_5.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_6)
+  {
+    &RS232_6.DATA,
+    &RS232_6.BAUDCTRLB,
+    &RS232_6.BAUDCTRLA,
+    &RS232_6.CTRLB,
+    &RS232_6.CTRLA,
+    &RS232_6.CTRLC,
+    0,
+    NULL
+  },
+  #endif
+  #if defined(RS232_7)
+  {
+    &RS232_7.DATA,
+    &RS232_7.BAUDCTRLB,
+    &RS232_7.BAUDCTRLA,
+    &RS232_7.CTRLB,
+    &RS232_7.CTRLA,
+    &RS232_7.CTRLC,
+    0,
+    NULL
+  },
+  #endif
 };
 
+
+
 /*-- interrupt level HIGH for transmit, empty and receive --*/
-USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = 
-						USART_RXCINTLVL_HI_gc;
-USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE =
-						USART_TXCINTLVL_HI_gc;
+// USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE = 
+// 						USART_RXCINTLVL_HI_gc;
+// USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE =
+// 						USART_TXCINTLVL_HI_gc;
 
 /*=== Interrupt Routines ===*/
-/*--USARTC0------------------------------------------------------------------*/
-ISR(USARTC0_TXC_vect)
-{
-  rs232_ports[USARTc0].txwait = 0;
+
+/* generic ISR versions */
+void inline usart_generic_tx_vect(uint8_t portnum){
+   //PORTE.OUT ^= (1<<1);
+  rs232_ports[portnum].txwait = 0;
+
 }
-/*---------------------------------------------------------------------------*/
-ISR(USARTC0_RXC_vect)
-{
+
+void inline usart_generic_rx_vect(uint8_t portnum){
+
   unsigned char c;
 
-  c = *(rs232_ports[USARTc0].DATA);
+  c = *(rs232_ports[portnum].DATA);
 
-  if(rs232_ports[USARTc0].input_handler != NULL) {
-    rs232_ports[USARTc0].input_handler(c);
+  if(rs232_ports[portnum].input_handler != NULL) {
+    rs232_ports[portnum].input_handler(c);
   }
 }
 
-/*---USARTC1-----------------------------------------------------------------*/
-ISR(USARTC1_TXC_vect)
-{
-  rs232_ports[USARTc1].txwait = 0;
-}
+
+/* ISR declatations pointing at the general version */
 /*---------------------------------------------------------------------------*/
-ISR(USARTC1_RXC_vect)
-{
-  unsigned char c;
 
-  c = *(rs232_ports[USARTc1].DATA);
+ISR(USARTE0_DRE_vect) { usart_generic_tx_vect(RS232_USARTE0);}
+ISR(USARTE0_TXC_vect) { usart_generic_tx_vect(RS232_USARTE0);}
 
-  if(rs232_ports[USARTc1].input_handler != NULL) {
-    rs232_ports[USARTc1].input_handler(c);
-  }
-}
+ISR(USARTE0_RXC_vect) { usart_generic_rx_vect(RS232_USARTE0); }
+ISR(USARTD0_TXC_vect) { usart_generic_tx_vect(RS232_USARTD0); }
+ISR(USARTD0_RXC_vect) { usart_generic_rx_vect(RS232_USARTD0); }
+ISR(USARTD1_TXC_vect) { usart_generic_tx_vect(RS232_USARTD1); }
+ISR(USARTD1_RXC_vect) { usart_generic_rx_vect(RS232_USARTD1); }
+ISR(USARTC0_TXC_vect) { usart_generic_tx_vect(RS232_USARTC0); }
+ISR(USARTC0_RXC_vect) { usart_generic_rx_vect(RS232_USARTC0); }
+ISR(USARTC1_TXC_vect) { usart_generic_tx_vect(RS232_USARTC1); }
+ISR(USARTC1_RXC_vect) { usart_generic_rx_vect(RS232_USARTC1); }
 
-/*---USARTD0-----------------------------------------------------------------*/
-ISR(USARTD0_TXC_vect)
-{
-  rs232_ports[USARTd0].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTD0_RXC_vect)
-{
-  unsigned char c;
 
-  c = *(rs232_ports[USARTd0].DATA);
-
-  if(rs232_ports[USARTd0].input_handler != NULL) {
-    rs232_ports[USARTd0].input_handler(c);
-  }
-}
-/*---USARTD1-----------------------------------------------------------------*/
-ISR(USARTD1_TXC_vect)
-{
-  rs232_ports[USARTd1].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTD1_RXC_vect)
-{
-  unsigned char c;
-
-  c = *(rs232_ports[USARTd1].DATA);
-
-  if(rs232_ports[USARTd1].input_handler != NULL) {
-    rs232_ports[USARTd1].input_handler(c);
-  }
-}
-
-/*---USARTE0-----------------------------------------------------------------*/
-ISR(USARTE0_TXC_vect)
-{
-  rs232_ports[USARTe0].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTE0_RXC_vect)
-{
-  unsigned char c;
-
-  c = *(rs232_ports[USARTe0].DATA);
-
-  if(rs232_ports[USARTe0].input_handler != NULL) {
-    rs232_ports[USARTe0].input_handler(c);
-  }
-}
-
-/*---USARTE1-----------------------------------------------------------------*/
-ISR(USARTE1_TXC_vect)
-{
-  rs232_ports[USARTe1].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTE1_RXC_vect)
-{
-  unsigned char c;
-
-  c = *(rs232_ports[USARTe1].DATA);
-
-  if(rs232_ports[USARTe1].input_handler != NULL) {
-    rs232_ports[USARTe1].input_handler(c);
-  }
-}
-
-/*---USARTF0-----------------------------------------------------------------*/
-ISR(USARTF0_TXC_vect)
-{
-  rs232_ports[USARTf0].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTF0_RXC_vect)
-{
-  unsigned char c;
-
-  c = *(rs232_ports[USARTf0].DATA);
-
-  if(rs232_ports[USARTf0].input_handler != NULL) {
-    rs232_ports[USARTf0].input_handler(c);
-  }
-}
-
-#if 0
-/*---USARTF1-----------------------------------------------------------------*/
-ISR(USARTF1_TXC_vect)
-{
-  rs232_ports[USARTf1].txwait = 0;
-}
-/*---------------------------------------------------------------------------*/
-ISR(USARTF1_RXC_vect)
-{
-  unsigned char c;
-
-  c = *(rs232_ports[USARTf1].DATA);
-
-  if(rs232_ports[USARTf1].input_handler != NULL) {
-    rs232_ports[USARTf1].input_handler(c);
-  }
-}
-#endif /*#if 0*/
-
-#else
+#else  /* end xmega*/
 #error Please define the UART registers for your MCU!
 #endif
 
@@ -416,7 +343,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 {
 	rs232_t *rs232 = &rs232_ports[port];
 
-#if defined (__AVR_ATxmega256A3__)
+#if defined (__RS232_ATXMEGA__)
 	/* 
 	 * we need same index for even and odd 
 	 * port numbers, so we clear the LSB.
@@ -527,18 +454,19 @@ rs232_set_input(uint8_t port, int (*f)(unsigned char))
   rs232_ports[port].input_handler = f;
 }
 /*---------------------------------------------------------------------------*/
+#if defined(SLIP_PORT)
 void
 slip_arch_writeb(unsigned char c)
 {
   rs232_send(SLIP_PORT, c);
 }
+#endif
 /*---------------------------------------------------------------------------*/
 int rs232_stdout_putchar(char c, FILE *stream);
 static uint8_t stdout_rs232_port=RS232_PORT_0;
 static FILE rs232_stdout = FDEV_SETUP_STREAM(rs232_stdout_putchar,
 					     NULL,
 					     _FDEV_SETUP_WRITE);
-
 int rs232_stdout_putchar(char c, FILE *stream)
 {
 #if ADD_CARRAGE_RETURNS_TO_SERIAL_OUTPUT

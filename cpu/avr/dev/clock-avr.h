@@ -1,6 +1,8 @@
 #ifndef CONTIKI_CLOCK_AVR_H
 #define CONTIKI_CLOCK_AVR_H
 
+#include <avr/io.h>
+
 #if defined (__AVR_ATmega128__)
 
 #define AVR_OUTPUT_COMPARE_INT TIMER0_COMP_vect
@@ -148,7 +150,8 @@
   TIMSK0 = _BV (OCIE0A);
 #endif /* AVR_CONF_USE32KCRYSTAL */
 
-#elif  defined(__AVR_ATxmega256A3__)
+/* all ATMEGAs should have TCC0 defined*/
+#elif  defined(TCC0)
 /*--- setup Timer/Counter 0 for system time ---*/
 /* use Timer/Counter 0 from timing*/
 #define TIMER TCC0
