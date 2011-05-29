@@ -58,16 +58,13 @@
 #include "dev/slip.h"
 #include "dev/watchdog.h"
 #include <autostart.h>
+#include "interrupt.h"
 
 #include <util/delay.h>
 
 #ifdef POE_LCD_TEST
 #include "lcd-test.h"
 #endif
-
-
-
-
 
 
 void setup_clock(void) {
@@ -119,14 +116,16 @@ void initialize(void)
   watchdog_init();
   setup_board();
 
-  PR.PRPC &= ~(0x02);
+//       
+//
+  interrupt_init( PMIC_CTRL_HML_gm);
+  interrupt_start();
   
-  PMIC.CTRL |= PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_LOLVLEN_bm;
-  sei();
-  //rs232_init(RS232_USARTE0, XMEGA_USART_CALC(9600),USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
   rs232_init(RS232_USARTE0, XMEGA_USART_CALC(9600) ,USART_PARITY_NONE | USART_STOP_BITS_1 | USART_DATA_BITS_8);
+
+
   rs232_redirect_stdout(RS232_USARTE0);
-    rs232_print(RS232_USARTE0, "TEST\n");
+
     
   setup_clock();
   clock_init();
@@ -152,15 +151,7 @@ void initialize(void)
 //#if ANNOUNCE_BOOT
   printf_P(PSTR("\n*******Booting %s*******\n"),CONTIKI_VERSION_STRING);
 //#endif
-  while(1) {
-    printf("test\n");
-   //   while(1) {
-    //PORTE.OUT ^= (1<<1);
-    _delay_ms(500);
-    sei();
-  
-    
-  }
+
 
 /* rtimers needed for radio cycling */
 //  rtimer_init();
