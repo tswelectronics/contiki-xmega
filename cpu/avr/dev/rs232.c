@@ -54,22 +54,25 @@
 #define ADD_CARRAGE_RETURNS_TO_SERIAL_OUTPUT 1
 #endif
 
-#if defined (__AVR_ATmega128__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega128RFA1__)
+/*The Structure is global to all the platforms*/
 typedef struct {
-  volatile uint8_t * UDR;
-  volatile uint8_t * UBRRH;
-  volatile uint8_t * UBRRL;
-  volatile uint8_t * UCSRB;
-  volatile uint8_t * UCSRC;
+  volatile uint8_t * DATA;
+  volatile uint8_t * BAUDH;
+  volatile uint8_t * BAUDL;
+  volatile uint8_t * FUNCTION;
+  volatile uint8_t * INTERRUPT;
+  volatile uint8_t * FORMAT;
   volatile uint8_t txwait;
   int (* input_handler)(unsigned char);
 } rs232_t;
 
+#if defined (__AVR_ATmega128__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega128RFA1__)
 static rs232_t rs232_ports[2] = {
   {   // UART0
     &UDR0,
     &UBRR0H,
     &UBRR0L,
+    &UCSR0B,
     &UCSR0B,
     &UCSR0C,
     0,
@@ -80,6 +83,7 @@ static rs232_t rs232_ports[2] = {
     &UDR1,
     &UBRR1H,
     &UBRR1L,
+    &UCSR1B,
     &UCSR1B,
     &UCSR1C,
     0,
@@ -123,21 +127,12 @@ ISR(USART1_RX_vect)
 
 #elif defined (__AVR_AT90USB1287__)
 /* Has only UART1, map it to port 0 */
-typedef struct {
-  volatile uint8_t * UDR;
-  volatile uint8_t * UBRRH;
-  volatile uint8_t * UBRRL;
-  volatile uint8_t * UCSRB;
-  volatile uint8_t * UCSRC;
-  volatile uint8_t txwait;
-  int (* input_handler)(unsigned char);
-} rs232_t;
-
 static rs232_t rs232_ports[1] = {
   {  // UART1
     &UDR1,
     &UBRR1H,
     &UBRR1L,
+    &UCSR1B,
     &UCSR1B,
     &UCSR1C,
     0,
