@@ -39,28 +39,15 @@
  *         jacopo mondi <mondi@cs.unibo.it>
  */
 
-#ifndef __RS232_ATXMEGA256a3__
-#define __RS232_ATXMEGA256a3__
+#ifndef __RS232_ATXMEGA__
+#define __RS232_ATXMEGA__
 /******************************************************************************/
 /***   Includes                                                               */
 /******************************************************************************/
 #include <avr/io.h>
 
-
 /******************************************************************************/
-/***   USART ports                                                            */
-/******************************************************************************/
-#define USARTc0  0x00
-#define USARTc1  0x01
-#define USARTd0  0x02
-#define USARTd1  0x03
-#define USARTe0  0x04
-#define USARTe1  0x05
-#define USARTf0  0x06
-#define USARTf1  0x07
-
-/******************************************************************************/
-/***   PORTS OFFSETS																													*/		
+/***   PORTS OFFSETS
 /******************************************************************************/
 /*this is PORTC, the first port with USART*/
 #define BASE_USART_PORT   0x0640
@@ -71,39 +58,106 @@
 #define USARTn1_RXD_bm (1<<6)
 //XXX MISSING BAUDRATES
 
+
+
+/******************************************************************************/
+/***   USART ports                                                            */
+/******************************************************************************/
+
+#if defined(__AVR_ATxmega32A4__)
+
+#if defined (RS232_0)
+#error already defined!
+#endif
+
+#define RS232_0 USARTC0
+#define RS232_1 USARTC1
+#define RS232_2 USARTD0
+#define RS232_3 USARTD1
+#define RS232_4 USARTE0
+
+#define RS232_USARTC0 0
+#define RS232_USARTC1 1
+#define RS232_USARTD0 2
+#define RS232_USARTD1 3
+#define RS232_USARTE0 4
+
+#define RS232_COUNT 5
+
+#elif defined (__AVR_ATxmega256A3__)
+
+#define RS232_0 USARTC0
+#define RS232_1 USARTC1
+#define RS232_2 USARTD0
+#define RS232_3 USARTD1
+#define RS232_4 USARTE0
+#define RS232_5 USARTE1
+#define RS232_6 USARTF0
+#define RS232_7 USARTF1
+
+#define RS232_USARTC0 0
+#define RS232_USARTC1 1
+#define RS232_USARTD0 2
+#define RS232_USARTD1 3
+#define RS232_USARTE0 4
+#define RS232_USARTE1 5
+#define RS232_USARTF0 6
+#define RS232_USARTF1 7
+
+#define RS232_COUNT 8
+
+#endif
+
+
+#define RS232_PORT_0 RS232_USARTE0
+
+#define XMEGA_USART_CALC(bd) (F_CPU / (8UL * bd)) - 1
+
 /******************************************************************************/
 /***   Interrupt settings                                                     */
 /******************************************************************************/
-//USART_RXCINTLVL_t USART_INTERRUPT_RX_COMPLETE;
-//USART_TXCINTLVL_t USART_INTERRUPT_TX_COMPLETE;
+#define USART_INTERRUPT_RX_COMPLETE USART_RXCINTLVL0_bm
+#define USART_INTERRUPT_TX_COMPLETE USART_TXCINTLVL0_bm
+#define USART_INTERRUPT_DATA_REG_EMPTY USART_DREINTLVL0_bm
 
 /******************************************************************************/
 /***   Receiver / transmitter                                                 */
 /******************************************************************************/
 #define USART_RECEIVER_ENABLE USART_RXEN_bm
-#define USART_TRANSMITTER_ENABLE USART_TXEN_bm
+#define USART_TRANSMITTER_ENABLE (USART_TXEN_bm | USART_CLK2X_bm)
 
 /******************************************************************************/
 /***   Mode select                                                            */
 /******************************************************************************/
-USART_CMODE_t USART_CMODE;
-
-/******************************************************************************/
-/***   Stop bit select                                                            */
-/******************************************************************************/
-typedef enum USART_SMODE_enum
-{
-	USART_SMODE_1BIT_gc = 0x00,
-	USART_SMODE_2BIT_gc = (0x01<<3),
-} USART_SMODE_t;
+#define USART_MODE_ASYNC USART_CMODE_ASYNCHRONOUS_gc
+#define USART_MODE_SYNC USART_CMODE_SYNCHRONOUS_gc
 
 /******************************************************************************/
 /***   Parity                                                                 */
 /******************************************************************************/
-USART_PMODE_t USART_PMODE;
+#define USART_PARITY_NONE USART_PMODE_DISABLED_gc
+#define USART_PARITY_EVEN USART_PMODE_EVEN_gc
+#define USART_PARITY_ODD  USART_PMODE_ODD_gc
+
+/******************************************************************************/
+/***   Stop bits                                                              */
+/******************************************************************************/
+#define USART_STOP_BITS_1 0x00
+#define USART_STOP_BITS_2 USART_SBMODE_bm
+
 /******************************************************************************/
 /***   Character size                                                         */
 /******************************************************************************/
-USART_CHSIZE_t USART_DATA_BITS;
+#define USART_DATA_BITS_5 USART_CHSIZE_5BIT_gc
+#define USART_DATA_BITS_6 USART_CHSIZE_6BIT_gc
+#define USART_DATA_BITS_7 USART_CHSIZE_7BIT_gc
+#define USART_DATA_BITS_8 USART_CHSIZE_8BIT_gc
+#define USART_DATA_BITS_9 USART_CHSIZE_9BIT_gc
 
-#endif /* #ifndef __RS232_ATMEGA128__ */
+/******************************************************************************/
+/***   Clock polarity                                                         */
+/******************************************************************************/
+#define USART_RISING_XCKN_EDGE 0x00
+#define USART_FALLING_XCKN_EDGE 0x01
+
+#endif /* #ifndef __RS232_ATXMEGA__ */

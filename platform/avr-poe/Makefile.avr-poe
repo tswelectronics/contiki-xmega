@@ -1,0 +1,32 @@
+CONTIKI_TARGET_DIRS = . apps dev dev/lcd dev/avr-poe-buttons dev/xmega-adc
+
+CONTIKI_CORE=contiki-poe-main
+CONTIKI_TARGET_MAIN = ${CONTIKI_CORE}.o
+CONTIKI_TARGET_SOURCEFILES += contiki-poe-main.c lcd.c avr-poe-buttons.c xmega-adc.c
+#uip.c tcpip.c uip-split.c eth-enc28j60.c uip_arp.c
+
+CONTIKIAVR=$(CONTIKI)/cpu/avr
+CONTIKIBOARD=.
+
+CONTIKI_PLAT_DEFS = -DF_CPU=12500000UL -DAUTOSTART_ENABLE -DAUTO_CRC_PADDING=2
+
+MCU=atxmega32a4
+AVRDUDE_PROGRAMMER=avrispmkII
+
+# For usb devices, you may either use PORT=usb, or (e.g. if you have more than one
+# programmer connected) you can use the following trick to find out the serial number:
+#
+# The example is for an JTAGICE mkII used to program an ATmega128:
+# avrdude -v -P usb:xxxx -c jtag2 -p atmega128
+AVRDUDE_PORT=usb
+
+
+# Additional avrdude options
+# Verify off
+AVRDUDE_OPTIONS=-V
+
+
+
+include $(CONTIKIAVR)/Makefile.avr_emb
+#include $(CONTIKIAVR)/radio/Makefile.radio
+
