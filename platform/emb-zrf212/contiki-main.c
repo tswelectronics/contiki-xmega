@@ -83,7 +83,6 @@ void initialize_lowlevel(void)
 	leds_off(0x01);
 #endif /* __USE_LEDS__ */
 
-
 	/*--- Setup system clock (if required) and start timer */
 #if defined(__SYSTEM_CLOCK_SETUP__)
 	system_clock_init();
@@ -133,7 +132,8 @@ main(void)
 		clock_wait(125);
 		leds_off(0x01);
 		clock_wait(125);
-		rs232_print(RS232_PORT_0,"A led is blinking... we are alive and well\n\0"); 
+		rs232_print(RS232_PORT_0,
+				"A led is blinking... we are alive and well\n\0"); 
 		//process_run();
 		//watchdog_periodic();
 	}
