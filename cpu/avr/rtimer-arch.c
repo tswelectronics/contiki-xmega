@@ -38,6 +38,7 @@
  * \author
  *         Fredrik Osterlind <fros@sics.se>
  *         Joakim Eriksson <joakime@sics.se>
+ *         Xmega: 2011/050/25 Jacopo Mondi <mondi@cs.unibo.it>
  */
 
 /* OBS: 8 seconds maximum time! */
@@ -70,6 +71,13 @@
 #define ETIFR TIFR3
 #define TICIE3 ICIE3
 #endif
+
+#if defined(__AVR_ATxmega256a3__)
+#ifdef TCNT3
+#undef TCNT3
+#endif
+
+
 /*---------------------------------------------------------------------------*/
 #ifdef TCNT3
 ISR (TIMER3_COMPA_vect) {
@@ -97,7 +105,27 @@ rtimer_arch_init(void)
   sreg = SREG;
   cli ();
 
-#ifdef TCNT3
+#if defined(__AVR_ATxmega256A3__)
+  /* Write 1 to clear existing timer function flags*/
+	RTC.INTFLAGS |= 0x02;
+	RTC.INTCTRL &= 0x00;/*disable interrupt*/
+
+	/* we are going to access 16 bit registers
+	 * disable interrupt to avoid interruptions*/
+	cli(); 	RTC_CNT =0x0000; 	sei();
+	/*wait for CNT update and sync*/
+	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
+	/* set PER to TOP, otherwise no compare 
+	 * match will be generated*/
+	cli();
+	CCP = CCP_IOREG_gc;
+	RTC_PER=0xffff;
+	sei();
+	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
+	/*start the clock, maximum prescaler*/
+	RTC.CTRL = 0x07;/*1024*/
+#endif /*__AVR_ATxmega2563__*/
+#elif defined(TCNT3)
   /* Disable all timer functions */
   ETIMSK &= ~((1 << OCIE3A) | (1 << OCIE3B) | (1 << TOIE3) |
       (1 << TICIE3) | (1 << OCIE3C));
@@ -115,10 +143,8 @@ rtimer_arch_init(void)
 
   /* Start clock, maximum prescaler */
   TCCR3B |= 5;
-
 #else
 #error "No Timer3 in rtimer-arch.c"
-
 #endif
 
   /* Restore interrupt state */
@@ -132,8 +158,17 @@ rtimer_arch_schedule(rtimer_clock_t t)
   uint8_t sreg;
   sreg = SREG;
   cli ();
+#if defined(__AVR_ATxmega256A3__)
+	uint16_t CNT_pre=RTC_CNT;
+	/*stop rtc (we suppose it is running)*/
+	RTC.CTRL = 0x00;
+	/*wait for CNT update and sync (2 RTC cycles)*/
+	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
 
-#ifdef TCNT3
+
+
+
+#elif defined(TCNT3)
   /* Set compare register */
   OCR3A = t;
   /* Write 1s to clear all timer function flags */
@@ -141,7 +176,6 @@ rtimer_arch_schedule(rtimer_clock_t t)
   (1 << OCF3C);
   /* Enable interrupt on OCR3A match */
   ETIMSK |= (1 << OCIE3A);
-
 #else
 #error "No Timer3 in rtimer-arch.c"
 
