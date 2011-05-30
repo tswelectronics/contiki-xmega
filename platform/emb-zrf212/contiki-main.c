@@ -51,11 +51,16 @@
 #include "contiki.h"
 #include "contiki-net.h"
 #include "contiki-lib.h"
+#include "autostart.h"
 
 #include "dev/leds.h"
 #include "dev/rs232.h"
 #include "interrupt.h"
 #include "watchdog.h"
+
+#include	"apps/common.h"
+
+
 
 #define ANNOUNCE_BOOT 1
 #define DEBUG 1
@@ -71,8 +76,7 @@
 void initialize_lowlevel(void)
 {
 	/* --- USART DATA ---
-	 * baud, parity, chsize, stop bit and communication mode*/
-	uint16_t baud=212; /*baud 9600 @32760 KHz*/
+	 * parity, chsize, stop bit and communication mode*/
 	USART_CHSIZE_t chsize = USART_CHSIZE_8BIT_gc;
 	USART_PMODE_t cmode = USART_CMODE_ASYNCHRONOUS_gc;
 	USART_CMODE_t pmode = USART_PMODE_DISABLED_gc;
@@ -136,7 +140,9 @@ main(void)
 	/*--- Setup platform and cpu specific subsystems ---*/
 	initialize_lowlevel();
   process_start(&etimer_process, NULL);
-  autostart_start(autostart_processes);
+	process_start(&blink_process, NULL);
+	process_start(&hello_world_process, NULL);
+ // autostart_start(autostart_processes);
 
 	while (1){
 		watchdog_periodic();
