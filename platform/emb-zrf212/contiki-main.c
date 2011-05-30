@@ -55,6 +55,17 @@
 #include "dev/leds.h"
 #include "dev/rs232.h"
 #include "interrupt.h"
+#include "watchdog.h"
+
+#define ANNOUNCE_BOOT 1
+#define DEBUG 1
+#if DEBUG
+#define PRINTF(FORMAT,args...) printf_P(PSTR(FORMAT),##args)
+#define PRINTSHORT(FORMAT,args...) printf_P(PSTR(FORMAT),##args)
+#else
+#define PRINTF(...)
+#define PRINTSHORT(...)
+#endif
 
 /*-------------------------Low level initialization------------------------*/
 void initialize_lowlevel(void)
@@ -74,34 +85,45 @@ void initialize_lowlevel(void)
 	 *  --- Initialize Low-Level --- 
 	 */
 
-	/*setup and configure global interrupts*/
+	/*--- Setup and configure global interrupts ---*/
 	interrupt_init(int_level);
-/*- Setup led module -- */
-#if defined(__USE_LEDS__)
-	leds_init();
-	leds_on(0x01);
-	leds_off(0x01);
-#endif /* __USE_LEDS__ */
-	/*--- Setup system clock (if required) and start timer */
+
+	/*--- Setup system clock (if required) and start timer --- */
 #if defined(__SYSTEM_CLOCK_SETUP__)
 	system_clock_init();
 #endif /* __SYSTEM_CLOCK_SETUP__*/
 	clock_init();
 
-	/*setup serial port on USARTD0*/
-	rs232_init(RS232_PORT_0, baud, 
+	/*--- Setup serial port on USARTD0 ---*/
+	rs232_init(RS232_PORT_0, XMEGA_USART_CALC(9600), 
 			(chsize | pmode | cmode | smode) );
-	rs232_print(RS232_PORT_0, "Setup Serial Channel\n\0");
+	rs232_redirect_stdout(RS232_PORT_0);
 
-	rs232_print(RS232_PORT_0, "Setup LED module\n\0");
+	/*--- Setup led module ---*/
+#if defined(__USE_LEDS__)
+	leds_init();
+	leds_on(0x08);
+	//leds_off(0x01);
+#endif /* __USE_LEDS__ */
+	PRINTF("Setup LED module\n\0");
 
-	/* start global interrupt  vector*/
+	/*--- Watchdog init ---*/
+	PRINTF("Setup Watchdog module\n\0");
+	watchdog_init();
+
+	/*--- start global interrupt  vector ---*/
+	PRINTF("Setup global interrupt vector\n\0");
 	interrupt_start();
-	rs232_print(RS232_PORT_0, "Startup global interrupt vector\n\0");
-	rs232_print(RS232_PORT_0, "BOOTING CONTIKI OS...\n\0");
-	clock_wait(70);
-	rs232_print(RS232_PORT_0, "DONE\n\0");
 
+	/*process subsystem start*/
+	PRINTF("Starting process subsystem..\n\n\0");
+  process_init();
+
+#if ANNOUNCE_BOOT	
+	clock_wait(70);
+  printf_P(PSTR("\n*******Booting %s*******\n"),CONTIKI_VERSION_STRING);
+#endif
+	leds_off(0x08);
 	return;
 
 }
@@ -113,28 +135,12 @@ main(void)
 {
 	/*--- Setup platform and cpu specific subsystems ---*/
 	initialize_lowlevel();
+  process_start(&etimer_process, NULL);
+  autostart_start(autostart_processes);
 
-//	leds_init();
-//	clock_init();
-	
-
-//	leds_on(0x03);
-//	leds_off(0x03);
-//	process_start(&etimer_process, NULL);
-//	ctimer_init();
-
-	//autostart_start(autostart_processes);
 	while (1){
-		;
-
-		leds_on(0x01);
-		clock_wait(125);
-		leds_off(0x01);
-		clock_wait(125);
-		rs232_print(RS232_PORT_0,
-				"A led is blinking... we are alive and well\n\0"); 
-		//process_run();
-		//watchdog_periodic();
+		watchdog_periodic();
+		process_run();
 	}
 
 	return 0;
