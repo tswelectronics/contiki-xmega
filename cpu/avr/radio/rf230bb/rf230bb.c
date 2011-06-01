@@ -566,7 +566,7 @@ set_txpower(uint8_t power)
 void
 calibrate_rc_osc_32k(void)
 {
-#if 1
+#if 0
 
     /* Calibrate RC Oscillator: The calibration routine is done by clocking TIMER2
      * from the external 32kHz crystal while running an internal timer simultaneously.
