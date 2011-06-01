@@ -144,9 +144,9 @@ volatile extern signed char rf230_last_rssi;
 #define HAL_SPI_TRANSFER_OPEN() { \
   HAL_ENTER_CRITICAL_REGION();	  \
   HAL_SS_LOW(); /* Start the SPI transaction by pulling the Slave Select low. */
-#define HAL_SPI_TRANSFER_WRITE(to_write) (SPDR = (to_write))
-#define HAL_SPI_TRANSFER_WAIT() ({while ((SPSR & (1 << SPIF)) == 0) {;}}) /* gcc extension, alternative inline function */
-#define HAL_SPI_TRANSFER_READ() (SPDR)
+#define HAL_SPI_TRANSFER_WRITE(to_write) (HAL_SPI_DATA = (to_write))
+#define HAL_SPI_TRANSFER_WAIT() ({while ((HAL_SPI_STATUS & SPI_IF_bm) == 0) {;}}) /* gcc extension, alternative inline function */
+#define HAL_SPI_TRANSFER_READ() (HAL_SPI_DATA)
 #define HAL_SPI_TRANSFER_CLOSE() \
     HAL_SS_HIGH(); /* End the transaction by pulling the Slave Select High. */ \
     HAL_LEAVE_CRITICAL_REGION(); \
@@ -201,7 +201,7 @@ inline uint8_t spiWrite(uint8_t byte)
  */
 #if defined(__AVR_ATmega128RFA1__)
 //#define HAL_RF230_ISR() ISR(RADIO_VECT)
-#define HAL_TIME_ISR()  ISR(TIMER1_OVF_vect)
+#define HAL_TIME_ISR()  ISR(TIMER_OVF_VECT)
 #define HAL_TICK_UPCNT() (TCNT1)
 void
 hal_init(void)
@@ -216,32 +216,65 @@ hal_init(void)
 
 #elif defined(__AVR__)
 #define HAL_RF230_ISR() ISR(RADIO_VECT)
-#define HAL_TIME_ISR()  ISR(TIMER1_OVF_vect)
+#define HAL_TIME_ISR()  ISR(TIMER_OVF_VECT)
 #define HAL_TICK_UPCNT() (TCNT1)
 void
 hal_init(void)
 {
     /*Reset variables used in file.*/
     hal_system_time = 0;
-//  hal_reset_flags();
+		//hal_reset_flags();
 
-    /*IO Specific Initialization - sleep and reset pins. */
-    DDR_SLP_TR |= (1 << SLP_TR); /* Enable SLP_TR as output. */
-    DDR_RST    |= (1 << RST);    /* Enable RST as output. */
+    /*
+		 *  IO Specific Initialization - sleep and reset pins. *
+		 *  Enable SLP_TR as output. *
+		 *  Enable RST as output. 
+		 */
+		hal_set_sleep();
+		hal_set_reset();
+#if 0
+    DDR_SLP_TR |= (1 << SLP_TR); 
+    DDR_RST    |= (1 << RST);    
+#endif
 
-    /*SPI Specific Initialization.*/
-    /* Set SS, CLK and MOSI as output. */
-    HAL_DDR_SPI  |= (1 << HAL_DD_SS) | (1 << HAL_DD_SCK) | (1 << HAL_DD_MOSI);
-    HAL_PORT_SPI |= (1 << HAL_DD_SS) | (1 << HAL_DD_SCK); /* Set SS and CLK high */
-    /* Run SPI at max speed */
-    SPCR         = (1 << SPE) | (1 << MSTR); /* Enable SPI module and master operation. */
-    SPSR         = (1 << SPI2X); /* Enable doubled SPI speed in master mode. */
-
-    /*TIMER1 Specific Initialization.*/
-    TCCR1B = HAL_TCCR1B_CONFIG;       /* Set clock prescaler */
-    TIFR1 |= (1 << ICF1);             /* Clear Input Capture Flag. */
-    HAL_ENABLE_OVERFLOW_INTERRUPT(); /* Enable Timer1 overflow interrupt. */
-    hal_enable_trx_interrupt();    /* Enable interrupts from the radio transceiver. */
+    /*
+		 * SPI Specific Initialization.
+     *  - Set SS, CLK and MOSI as output.
+		 *  - Set SS and CLK high.
+		 *  - Run SPI at max speed
+		 *  - Enable SPI and master mode
+		 */
+		hal_spi_clear();
+		hal_spi_set_direction();
+		hal_spi_pin_init();
+		hal_spi_set_mode();
+		hal_spi_set_speed();
+#if 0
+		HAL_SPI_MODE = 0; HAL_SPI_SPEED = 0;
+    HAL_DDR_SPI   |= (1 << HAL_DD_SS) 
+								  | (1 << HAL_DD_SCK)  
+								  | (1 << HAL_DD_MOSI);
+    HAL_PORT_SPI  |= (1 << HAL_DD_SS) | (1 << HAL_DD_SCK); 
+    HAL_SPI_MODE  |= SPI_ENABLE_bm | SPI_MASTER_bm; 
+    HAL_SPI_SPEED |= SPI_CLK2X_bm;
+#endif
+    /*
+		 * TIMER1 Specific Initialization.
+		 * - Set prescaler
+		 * - Clear input capture interrupt
+		 * - Enable Timer overflow interrupt
+		 * - Enable radio transceiver interrupt
+		 */
+		hal_timer_set_prescaler();
+		hal_timer_clear_input_capture();
+		hal_timer_enable_overflow_interrupt();
+		hal_enable_txrx_interrupt();
+#if 0
+    TCCR1B = HAL_TCCR1B_CONFIG;       
+    TIFR1 |= (1 << ICF1);             
+    HAL_ENABLE_OVERFLOW_INTERRUPT(); 
+    hal_enable_trx_interrupt();    
+#endif
 }
 
 #else /* __AVR__ */
