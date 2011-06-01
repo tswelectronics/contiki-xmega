@@ -29,4 +29,4 @@ AVRDUDE_OPTIONS=-V
 
 
 include $(CONTIKIAVR)/Makefile.avr_emb
-#include $(CONTIKIAVR)/radio/Makefile.radio
+include $(CONTIKIAVR)/radio/Makefile.radio

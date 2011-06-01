@@ -43,12 +43,17 @@
 #define __CONTIKI_CONF_H__
 
 /* MCU and clock rate */
-#define PLATFORM       PLATFORM_EMB_ZRF212
-#define __EMB_ZRF212__
-#define HARWARE_REVISION ATXMEGA256a3
-#ifndef F_CPU
-#define F_CPU          32768000UL
+#define PLATFORM       PLATFORM_EMB_ZRF212 /*match radio hal abstraction*/
+#define __EMB_ZRF212__ /*define the platform*/
+#define HARWARE_REVISION ATXMEGA256a3 /*define the mmc (match the avr-libc definition)*/
+#define HW_PLATFORM XMEGA /*used for radio hal abstraction*/
+
+
+#ifdef F_CPU
+#undef F_CPU
 #endif
+#define F_CPU          32768000UL
+
 #include <stdint.h>
 #include <avr/io.h>
 
