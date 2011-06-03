@@ -496,19 +496,6 @@
  * HAL_TIMER1 MACROS
  * ===
  */
-/** 
- *  \brief Timer1 related defines
- *  \{
- */
-#if defined(XMEGA)
-#define HAL_TIMER1 TCC1
-#define HAL_TIMER1_PRE HAL_TIMER1.CTRLA
-#else /* ! XMEGA */
-#define HAL_TIMER1_PRE TCCR1B
-#define HAL_TIMER1_INT TIFR1 
-#define HAL_TIMER1_INT_CAPTURE_bm (1 << ICF1);             
-#endif
-/** \} */
 
 /** 
  * \brief Macros defined for HAL_TIMER1.
@@ -519,114 +506,123 @@
  *  system time in symbols (16 us ticks).
  */
 #if defined(__AVR__)
-#if		( F_CPU == 32768000UL )
-		#warning "DON'T KNOW WHAT TO DO!"
-		#define HAL_TCCR1B_CONFIG asd
-		#define HAL_US_PER_SYMBOL ?
-		#define HAL_SYMBOL_MASK 	?
-#elif ( F_CPU == 16000000UL )
-    #define HAL_TCCR1B_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS12 ) )
+#if defined(XMEGA)
+		#define HAL_RFTIMER TCC1
+		#define HAL_RFTIMER_PRE			  	HAL_RFTIMER1.CTRLA
+		#define HAL_RFTIMER_INT	 				HAL_TIMER1.INTCTRLA
+		#define HAL_RFTIMER_OVF_bm 			0x03
+		#define HAL_RFTIMER_CAPTURE	 		HAL_TIMER1.INTCTRLB
+		#define HAL_RFTIMER_CAPTURE_bm 	0xff
+
+#if	( F_CPU == 32768000UL )
+		#define HAL_TIMER_PRE_CONFIG (0x07) /*prescaler 1024*/
+		#define HAL_US_PER_SYMBOL ( 2 ) 
+		#define HAL_SYMBOL_MASK 	( 0x7FFFffff )
+#else /* ! 32768000 */
+#error "Your Xmega clock is unsupported"
+
+#else /* ! XMEGA */
+		#define HAL_RFTIMER_PRE 					TCCR1B
+		#define HAL_RFTIMER_INT 					TIFR1 
+		#define HAL_RFTIMER_OVF_bm 				(1<<TOIE1)
+		#define HAL_RFTIMER_CAPTURE 			TIFR1 
+		#define HAL_RFTIMER_CAPTURE_bm 		(1 << ICF1);             
+
+#if ( F_CPU == 16000000UL )
+    #define HAL_TIMER_PRE_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS12 ) )
     #define HAL_US_PER_SYMBOL ( 1 )
     #define HAL_SYMBOL_MASK   ( 0xFFFFffff )
 #elif ( F_CPU == 8000000UL )
-    #define HAL_TCCR1B_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) | ( 1 << CS10 ) )
+    #define HAL_TIMER_PRE_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) | ( 1 << CS10 ) )
     #define HAL_US_PER_SYMBOL ( 2 )
     #define HAL_SYMBOL_MASK   ( 0x7FFFffff )
 #elif ( F_CPU == 4000000UL )
-    #define HAL_TCCR1B_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) | ( 1 << CS10 ) )
+    #define HAL_TIMER_PRE_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) | ( 1 << CS10 ) )
     #define HAL_US_PER_SYMBOL ( 1 )
     #define HAL_SYMBOL_MASK   ( 0xFFFFffff )
 #elif ( F_CPU == 1000000UL )
-    #define HAL_TCCR1B_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) )
+    #define HAL_TIMER_PRE_CONFIG ( ( 1 << ICES1 ) | ( 1 << CS11 ) )
     #define HAL_US_PER_SYMBOL ( 2 )
     #define HAL_SYMBOL_MASK   ( 0x7FFFffff )
 #else
     #error "Clock speed not supported."
-#endif
+#endif /* defined(XMEGA) */
 
 /* 
  * ===
- * Timer1 and interrupt wrapper functions
+ * Timer1 wrapper functions
  * ===
  *
  * Those macros expand to platform specific functions 
+ */
+#define hal_timer_clear_input_capture() HAL_CLEAR_INPUT_CAPUTURE()
+/** \brief Enable interrupt for timer overflow  */
+#define hal_timer_enable_overflow_interrupt() (HAL_RFTIMER_INT |= HAL_TIMER_OVF_bm)
+/** \brief Disable interrupt for timer overflow  */
+#define hal_timer_disable_overflow_interrupt() (HAL_RFTIMER_INT &= ~HAL_TIMER_OVF_bm)
+/** \brief set the prescaler using macro based on F_CPU */
+#define	hal_timer_set_prescaler()				 (HAL_RFTIMER1_PRE |= HAL_TIMER_PRE_CONFIG)
+/** \brief Clear the input capture flag  */
+#define hal_clear_input_capture()		 	 (HAL_RFTIMER_CAPTURE &= ~HAL_RFTIMER_CAPTURE_bm)	
+
+/*
+ * ===
+ * Radio interrupt platform specific macros
+ * ===
+ */ 
+/**
+ *  Low Level radio interrupt macros
+ * \brief Platform specific macros used to set 
+ * 				up interrupt from rf chip 
+ * \{
  */
 /**  \brief  Enable the interrupt from the radio transceiver. */
 #define hal_enable_txrx_interrupt( ) HAL_ENABLE_RADIO_INTERRUPT( )
 /** \brief  Disable the interrupt from the radio transceiver.
  *  \retval 0 if the pin is low, 1 if the pin is high. */
 #define hal_disable_trx_interrupt( ) HAL_DISABLE_RADIO_INTERRUPT( )
-/** \brief set the prescaler using macro based on F_CPU */
-#define	hal_timer_set_prescaler() HAL_TIMER_SET_PRESCALER()
-/** \brief Clear the input capture flag  */
-#define hal_timer_clear_input_capture() HAL_CLEAR_INPUT_CAPUTURE()
-/** \brief Enable interrupt for timer overflow  */
-#define	hal_timer_enable_overflow_interrupt() HAL_ENABLE_OVERFLOW_INTERRUPT()
 
-/*
- * ===
- * Timer1 and interrupt platform specific macros
- * ===
- */ 
-/**
- *  Low Leve interrupt and timer macros
- * \brief Platform specific macros used to set 
- * 				up interrupt and timer1
- * \{
- */
+
 #if HARWARE_REVISION == ZIGBIT
-#define RADIO_VECT INT5_vect// IRQ E5 for Zigbit example
-#define TIMER_OVF_VECT TIMER1_OVF_vect
-#define HAL_DISABLE_RADIO_INTERRUPT( ) ( EIMSK &= ~( 1 << INT5 ) )
-#define HAL_ENABLE_RADIO_INTERRUPT( ) { ( EIMSK |= ( 1 << INT5 ) ) ;\
+#define RADIO_VECT 										INT5_vect// IRQ E5 for Zigbit example
+#define TIMER_OVF_VECT 								TIMER1_OVF_vect
+#define HAL_ENABLE_RADIO_INTERRUPT( ) \
+				{ ( EIMSK |= ( 1 << INT5 ) ) ;\
  				EICRB |= 0x0C ;\
  				PORTE &= ~(1<<PE5);\
 				DDRE &= ~(1<<DDE5); }
-#define HAL_ENABLE_OVERFLOW_INTERRUPT( ) ( TIMSK1 |= ( 1 << TOIE1 ) )
-#define HAL_DISABLE_OVERFLOW_INTERRUPT( ) ( TIMSK1 &= ~( 1 << TOIE1 ) )
-#define	HAL_TIMER_SET_PRESCALER() (HAL_TIMER1_PRE | HAL_TCCR1B_CONFIG)
-#define HAL_CLEAR_INPUT_CAPUTURE()
+#define HAL_DISABLE_RADIO_INTERRUPT() 	 (EIMSK &= ~( 1 << INT5 ) )
+
+//#define HAL_ENABLE_OVERFLOW_INTERRUPT()(TIMSK1 |= ( 1 << TOIE1 ) )
 
 #elif HW_PLATFORM == XMEGA
 #warning "Still to be defined"
-#define  RADIO_VECT asda
-#define  TIMER_OVF_VECT asdd
-#define	 HAL_TIMER_SET_PRESCALER() (HAL_TIMER1_PRE | HAL_TCCR1B_CONFIG)
-#define  HAL_ENABLE_RADIO_INTERRUPT( )
-#define  HAL_DISABLE_RADIO_INTERRUPT( )
-#define  HAL_CLEAR_INPUT_CAPUTURE()
-#define	 HAL_ENABLE_OVERFLOW_INTERRUPT()
+#define  RADIO_VECT											 asda
+#define  TIMER_OVF_VECT 								 asdd
+#define  HAL_ENABLE_RADIO_INTERRUPT()
+#define  HAL_DISABLE_RADIO_INTERRUPT()	 	
 
 #else /* ! ZIGBIT ! XMEGA */
-#define RADIO_VECT 		 TIMER1_CAPT_vect
-#define TIMER_OVF_VECT TIMER1_OVF_vect
-#define HAL_ENABLE_RADIO_INTERRUPT( ) ( TIMSK1 |= ( 1 << ICIE1 ) )
-#define HAL_DISABLE_RADIO_INTERRUPT( ) ( TIMSK1 &= ~( 1 << ICIE1 ) )
-#define HAL_ENABLE_OVERFLOW_INTERRUPT( ) ( TIMSK1 |= ( 1 << TOIE1 ) )
-#define HAL_DISABLE_OVERFLOW_INTERRUPT( ) ( TIMSK1 &= ~( 1 << TOIE1 ) )
-#define	 HAL_TIMER_SET_PRESCALER() (HAL_TIMER1_PRE | HAL_TCCR1B_CONFIG)
-#define HAL_CLEAR_INPUT_CAPUTURE()
-#endif
-/** \} */
+#define RADIO_VECT 		 										TIMER1_CAPT_vect
+#define TIMER_OVF_VECT 										TIMER1_OVF_vect
+#define HAL_ENABLE_RADIO_INTERRUPT()	 		( TIMSK1 |= ( 1 << ICIE1 ) )
+#define HAL_DISABLE_RADIO_INTERRUPT() 		( TIMSK1 &= ~( 1 << ICIE1 ) )
+#endif /* HARDWARE_REVISION == ZIGBIT */
 
+/** \} */
 /** This macro will protect the following code from interrupts.*/
 #define HAL_ENTER_CRITICAL_REGION( ) {uint8_t volatile saved_sreg = SREG; cli( )
-
 /** This macro must always be used in conjunction with HAL_ENTER_CRITICAL_REGION
     so that interrupts are enabled again.*/
 #define HAL_LEAVE_CRITICAL_REGION( ) SREG = saved_sreg;}
 
 #else /* MULLE */
-
 #define HAL_ENABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE |= 1 )
 #define HAL_DISABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE &= ~(1) )
-
 #define HAL_ENABLE_OVERFLOW_INTERRUPT( ) ( TB4IC.BYTE = 1 )
 #define HAL_DISABLE_OVERFLOW_INTERRUPT( ) ( TB4IC.BYTE = 0 )
-
 /** This macro will protect the following code from interrupts.*/
 #define HAL_ENTER_CRITICAL_REGION( ) MULLE_ENTER_CRITICAL_REGION( )
-
 /** This macro must always be used in conjunction with HAL_ENTER_CRITICAL_REGION
     so that interrupts are enabled again.*/
 #define HAL_LEAVE_CRITICAL_REGION( ) MULLE_LEAVE_CRITICAL_REGION( )
