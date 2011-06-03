@@ -10,6 +10,7 @@
  *	Kevin Brown kbrown3@uccs.edu
  *	Nate Bohlmann nate@elfwerks.com
  *	David Kopf dak664@embarqmail.com
+ *	Jacopo Mondi mondi@cs.unibo.it
  *
  *   All rights reserved.
  *
@@ -144,18 +145,21 @@ volatile extern signed char rf230_last_rssi;
 #define HAL_SPI_TRANSFER_OPEN() { \
   HAL_ENTER_CRITICAL_REGION();	  \
   HAL_SS_LOW(); /* Start the SPI transaction by pulling the Slave Select low. */
+
 #define HAL_SPI_TRANSFER_WRITE(to_write) (HAL_SPI_DATA = (to_write))
-#define HAL_SPI_TRANSFER_WAIT() ({while ((HAL_SPI_STATUS & SPI_IF_bm) == 0) {;}}) /* gcc extension, alternative inline function */
+/* gcc extension, alternative inline function */
+#define HAL_SPI_TRANSFER_WAIT() ({while ((HAL_SPI_STATUS & SPI_IF_bm) == 0) {;}}) 
 #define HAL_SPI_TRANSFER_READ() (HAL_SPI_DATA)
+
+#define HAL_SPI_TRANSFER(to_write)( 	\
+				    HAL_SPI_TRANSFER_WRITE(to_write),	\
+				    HAL_SPI_TRANSFER_WAIT(),		\
+				    HAL_SPI_TRANSFER_READ())
+
 #define HAL_SPI_TRANSFER_CLOSE() \
     HAL_SS_HIGH(); /* End the transaction by pulling the Slave Select High. */ \
     HAL_LEAVE_CRITICAL_REGION(); \
     }
-#define HAL_SPI_TRANSFER(to_write) (	  \
-				    HAL_SPI_TRANSFER_WRITE(to_write),	\
-				    HAL_SPI_TRANSFER_WAIT(),		\
-				    HAL_SPI_TRANSFER_READ() )
-
 #else /* __AVR__ */
 /*
  * Other SPI architecture (parts to core, parts to m16c6Xp 
@@ -490,7 +494,7 @@ hal_subregister_write(uint16_t address, uint8_t mask, uint8_t position,
  sei();
 }
 
-#else /* defined(__AVR_ATmega128RFA1__) */
+#else /* ! defined(__AVR_ATmega128RFA1__) */
 /*----------------------------------------------------------------------------*/
 /** \brief  This function reads data from one of the radio transceiver's registers.
  *
@@ -956,7 +960,7 @@ HAL_RF230_ISR() //for reference, for now
     }
 }
 #endif
-#else /* defined(__AVR_ATmega128RFA1__) */
+#else /* ! defined(__AVR_ATmega128RFA1__) */
 /* Separate RF230 has a single radio interrupt and the source must be read from the IRQ_STATUS register */
 HAL_RF230_ISR()
 {
