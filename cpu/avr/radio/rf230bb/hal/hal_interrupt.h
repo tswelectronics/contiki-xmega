@@ -54,35 +54,52 @@
  * \{
  */
 #if defined(__AVR__)
-#if HARWARE_REVISION == ZIGBIT
-#define RADIO_VECT 										INT5_vect// IRQ E5 for Zigbit example
-#define TIMER_OVF_VECT 								TIMER1_OVF_vect
-#define HAL_ENABLE_RADIO_INTERRUPT( ) \
+
+	#if HARWARE_REVISION == ZIGBIT
+		#define RADIO_VECT 										INT5_vect// IRQ E5 for Zigbit example
+		#define TIMER_OVF_VECT 								TIMER1_OVF_vect
+		#define HAL_ENABLE_RADIO_INTERRUPT( ) \
 				{ ( EIMSK |= ( 1 << INT5 ) ) ;\
  				EICRB |= 0x0C ;\
  				PORTE &= ~(1<<PE5);\
 				DDRE &= ~(1<<DDE5); }
-#define HAL_DISABLE_RADIO_INTERRUPT() 	 (EIMSK &= ~( 1 << INT5 ) )
+		#define HAL_DISABLE_RADIO_INTERRUPT() 	 (EIMSK &= ~( 1 << INT5 ) )
 
-#elif HW_PLATFORM == XMEGA
-#warning "UNDEFINED FOR XMEGA"
-#define  RADIO_VECT											 asda
-#define  TIMER_OVF_VECT 								 asdd
-#define  HAL_ENABLE_RADIO_INTERRUPT()
-#define  HAL_DISABLE_RADIO_INTERRUPT()	 	
-
-#else /* ! ZIGBIT ! XMEGA */
-#define RADIO_VECT 		 										TIMER1_CAPT_vect
-#define TIMER_OVF_VECT 										TIMER1_OVF_vect
-#define HAL_ENABLE_RADIO_INTERRUPT()	 		( TIMSK1 |= ( 1 << ICIE1 ) )
-#define HAL_DISABLE_RADIO_INTERRUPT() 		( TIMSK1 &= ~( 1 << ICIE1 ) )
-#endif /* HARDWARE_REVISION == ZIGBIT */
-
+	#elif HW_PLATFORM == XMEGA
+		#define  TIMER_OVF_VECT 								TCC1_OVF_vect	
+		#if defined(__EMB_ZRF212__)
+			#define  RF_PORT 												PORTC
+			#define	 RF_PIN_bm											(1<<2)	
+			#define  RADIO_VECT											PORTC_INT0_vect
+			#define  HAL_ENABLE_RADIO_INTERRUPT() {\
+						/*make RF_PIN input*/\
+						RF_PORT.DIR &= ~RF_PIN_bm;\
+						/*trigger rising edge and set as pulldown*/\
+						RF_PORT.PIN2CTRL = PORT_ISC0_bm | PORT_OPC_PULLDOWN_gc;\
+						/*clear intflags*/\
+					  RF_PORT.INTFLAGS = PORT_INT0IF_bm;\
+						/*enable INT0 on PIN2*/\
+						RF_PORT.INT0MASK = PIN2_bm;\
+						/*set input as high level*/\
+					  RF_PORT.INTCTRL |= PORT_INT0LVL_HI_gc;}
+			#define HAL_DISABLE_RADIO_INTERRUPT() {\
+						/*clean up everything*/\
+						RF_PORT.INT0MASK &= ~PIN2_bm;\
+						RF_PORT.INTCTRL = 0;\
+						RF_PORT.PIN2CTRL = 0;}
+		#else
+			#error "define rf interrupt pin for your xmega platform"
+		#endif
+	#else /* ! ZIGBIT ! XMEGA */
+		#define RADIO_VECT 		 										TIMER1_CAPT_vect
+		#define TIMER_OVF_VECT 										TIMER1_OVF_vect
+		#define HAL_ENABLE_RADIO_INTERRUPT()	 		( TIMSK1 |= ( 1 << ICIE1 ) )
+		#define HAL_DISABLE_RADIO_INTERRUPT() 		( TIMSK1 &= ~( 1 << ICIE1 ) )
+	#endif /* HARDWARE_REVISION == ZIGBIT */
 
 #else /* MULLE */
-#define HAL_ENABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE |= 1 )
-#define HAL_DISABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE &= ~(1) )
-
+	#define HAL_ENABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE |= 1 )
+	#define HAL_DISABLE_RADIO_INTERRUPT( ) ( INT1IC.BYTE &= ~(1) )
 #endif /* !__AVR__ */
 /** \} */
 
