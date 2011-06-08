@@ -116,8 +116,8 @@
 /******************************************************************************/
 /***   Interrupt settings                                                     */
 /******************************************************************************/
-#define USART_INTERRUPT_RX_COMPLETE USART_RXCINTLVL0_bm
-#define USART_INTERRUPT_TX_COMPLETE USART_TXCINTLVL0_bm
+#define USART_INTERRUPT_RX_COMPLETE USART_RXCINTLVL1_bm
+#define USART_INTERRUPT_TX_COMPLETE USART_TXCINTLVL1_bm
 #define USART_INTERRUPT_DATA_REG_EMPTY USART_DREINTLVL0_bm
 
 /******************************************************************************/

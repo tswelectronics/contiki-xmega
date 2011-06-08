@@ -350,7 +350,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 	 */
 	uint8_t port_index = ((port&0xfe)/2);
 	PORT_t *USART_port = (PORT_t *) (BASE_USART_PORT + 
-									 			(USART_PORT_OFFSET*port_index));
+			(USART_PORT_OFFSET*port_index));
 	/*
 	 * We need to set TX pin as output, and set it 
 	 * high before setting direction.
@@ -382,7 +382,7 @@ rs232_init (uint8_t port, uint16_t bd, uint8_t ffmt)
 					USART_TRANSMITTER_ENABLE;
 
   /* - Enable interrupts for receiver and transmitter
-	 *   (high priority interrupts for xmega)
+	 *   ( medium priority interrupts for xmega)
    */
 	(*(*rs232).INTERRUPT) |= 
 	 				USART_INTERRUPT_RX_COMPLETE |
