@@ -35,7 +35,7 @@
  * 				Main Loop for Contiki OS on EMB-ZRF212 plat.
  * 				This Module initialize low-level
  * 				subsystems and starts main loop, where auto-start
- * 				processes are launched and event dispatched
+ * 				and other processes are launched and event dispatched
  *
  * \author
  * 				jacopo mondi <mondi@cs.unibo.it>
@@ -58,6 +58,7 @@
 #include "interrupt.h"
 #include "watchdog.h"
 
+/* processes definition*/ 
 #include	"apps/common.h"
 
 
@@ -71,6 +72,16 @@
 #define PRINTF(...)
 #define PRINTSHORT(...)
 #endif
+
+
+/*
+ * Real timer related functions and data
+ */
+struct rtimer rt;
+int rtimer_flag=1;
+void rtimer_flag_on(){
+	rtimer_flag=1;
+}
 
 /*-------------------------Low level initialization------------------------*/
 void initialize_lowlevel(void)
@@ -119,6 +130,10 @@ void initialize_lowlevel(void)
 	PRINTF("Setup global interrupt vector\n\0");
 	interrupt_start();
 
+	/*--- start real timer ---*/
+	PRINTF("Start real timer\n\0");
+	rtimer_init();
+
 	/*process subsystem start*/
 	PRINTF("Starting process subsystem..\n\n\0");
   process_init();
@@ -137,6 +152,8 @@ void initialize_lowlevel(void)
 int
 main(void)
 {
+
+	int inc = 1;
 	/*--- Setup platform and cpu specific subsystems ---*/
 	initialize_lowlevel();
   process_start(&etimer_process, NULL);
@@ -147,6 +164,16 @@ main(void)
 	while (1){
 		watchdog_periodic();
 		process_run();
+
+		/*schedule a printf with increasing delay (from 1s to 10s)*/
+		if (rtimer_flag){
+			rtimer_set(&rt, RTIMER_NOW()+ RTIMER_ARCH_SECOND*inc, 
+					1,(void *) rtimer_flag_on, NULL);
+      rtimer_flag=0;
+
+			PRINTF("RT delay: %d", inc);
+			if (++inc == 10) inc=1;
+		}
 	}
 
 	return 0;

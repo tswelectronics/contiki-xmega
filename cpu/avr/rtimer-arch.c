@@ -76,6 +76,7 @@
 #ifdef TCNT3
 #undef TCNT3
 #endif
+#endif
 
 
 /*---------------------------------------------------------------------------*/
@@ -92,6 +93,16 @@ ISR (TIMER3_COMPA_vect) {
   ENERGEST_OFF(ENERGEST_TYPE_IRQ);
 }
 
+#elif defined(__AVR_ATxmega256A3__)
+ISR (RTC_OVF_vect ){
+	/* 
+	 * Disable overflow interrupt 
+	 * Callback function (see core/sys/timer.c)
+	 * and schedule next timer
+	 */
+	RTC.INTCTRL = ~RTC_OVFINTLVL_MED_gc;
+	rtimer_run_next();
+}
 #else
 #error "No Timer3 in rtimer-arch.c"
 
@@ -103,29 +114,34 @@ rtimer_arch_init(void)
   /* Disable interrupts (store old state) */
   uint8_t sreg;
   sreg = SREG;
-  cli ();
 
 #if defined(__AVR_ATxmega256A3__)
+	/*
+	 * Setup RTC clock: (From ATXmega example software)
+	 * 	Start internal 32.768KHz Clock
+	 * 	Set RTC clock source at 1.024KHz from internal clock
+	 *	Enable RTC
+	 */
+	OSC.CTRL |= OSC_RC32KEN_bm;
+	do {
+		/* Wait for the 32kHz oscillator to stabilize. */
+	} while ( ( OSC.STATUS & OSC_RC32KRDY_bm ) == 0);
+	/* Set internal 32kHz oscillator as clock source for RTC. 
+	 * (scaled down to 1024) */
+	CLK.RTCCTRL = CLK_RTCSRC_RCOSC_gc | CLK_RTCEN_bm;
+
   /* Write 1 to clear existing timer function flags*/
 	RTC.INTFLAGS |= 0x02;
-	RTC.INTCTRL &= 0x00;/*disable interrupt*/
+	RTC.INTCTRL   = 0x00;
 
-	/* we are going to access 16 bit registers
-	 * disable interrupt to avoid interruptions*/
-	cli(); 	RTC_CNT =0x0000; 	sei();
 	/*wait for CNT update and sync*/
+	RTC.CNT = 0x0000;
 	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
-	/* set PER to TOP, otherwise no compare 
-	 * match will be generated*/
-	cli();
-	CCP = CCP_IOREG_gc;
-	RTC_PER=0xffff;
-	sei();
-	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
-	/*start the clock, maximum prescaler*/
-	RTC.CTRL = 0x07;/*1024*/
-#endif /*__AVR_ATxmega2563__*/
-#elif defined(TCNT3)
+	/*start the clock, no prescaler (1024)*/
+	RTC.CTRL = RTC_PRESCALER_DIV1_gc;
+ 
+#elif defined(TCNT3)/*__AVR_ATxmega2563__*/
+  cli();
   /* Disable all timer functions */
   ETIMSK &= ~((1 << OCIE3A) | (1 << OCIE3B) | (1 << TOIE3) |
       (1 << TICIE3) | (1 << OCIE3C));
@@ -145,7 +161,7 @@ rtimer_arch_init(void)
   TCCR3B |= 5;
 #else
 #error "No Timer3 in rtimer-arch.c"
-#endif
+#endif /*__AVR_ATxmega2563__*/
 
   /* Restore interrupt state */
   SREG = sreg;
@@ -160,13 +176,15 @@ rtimer_arch_schedule(rtimer_clock_t t)
   cli ();
 #if defined(__AVR_ATxmega256A3__)
 	uint16_t CNT_pre=RTC_CNT;
-	/*stop rtc (we suppose it is running)*/
+	/*stop rtc clearing RTC*/ 
 	RTC.CTRL = 0x00;
-	/*wait for CNT update and sync (2 RTC cycles)*/
 	while (RTC.STATUS & RTC_SYNCBUSY_bm) {;}
 
-
-
+	/*Set period and trigger overflow interrupt (medium level)*/
+	RTC.PER = (uint16_t) t;
+	RTC.INTCTRL |= RTC_OVFINTLVL_MED_gc;
+	/*start RTC again*/
+	RTC.CTRL = RTC_PRESCALER_DIV1_gc;
 
 #elif defined(TCNT3)
   /* Set compare register */

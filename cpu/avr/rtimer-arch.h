@@ -38,7 +38,7 @@
 
 /* Will affect radio on/off timing for cx-mac */
 #if defined(__AVR_ATxmega256A3__)
-#define RTIMER_ARCH_SECOND (32000U)
+#define RTIMER_ARCH_SECOND (1024)
 #else
 #define RTIMER_ARCH_SECOND (8192)
 #endif
