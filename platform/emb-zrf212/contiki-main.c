@@ -171,9 +171,11 @@ main(void)
 					1,(void *) rtimer_flag_on, NULL);
       rtimer_flag=0;
 
-			PRINTF("RT delay: %d", inc);
+			PRINTF("I've slept %d seconds\n\0", inc-1);
+			//printf_P("RT delay: %d\n\0", inc);
 			if (++inc == 10) inc=1;
 		}
+
 	}
 
 	return 0;

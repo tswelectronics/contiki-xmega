@@ -35,6 +35,7 @@
  * \file
  *         AVR-specific rtimer code
  *         Currently only works on ATMEGAs that have Timer 3.
+ *         Uses RTC on Xmegas.
  * \author
  *         Fredrik Osterlind <fros@sics.se>
  *         Joakim Eriksson <joakime@sics.se>
@@ -100,8 +101,9 @@ ISR (RTC_OVF_vect ){
 	 * Callback function (see core/sys/timer.c)
 	 * and schedule next timer
 	 */
-	RTC.INTCTRL = ~RTC_OVFINTLVL_MED_gc;
+	RTC.INTCTRL = 0;
 	rtimer_run_next();
+
 }
 #else
 #error "No Timer3 in rtimer-arch.c"

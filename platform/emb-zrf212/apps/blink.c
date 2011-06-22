@@ -15,9 +15,11 @@ PROCESS_THREAD(blink_process, ev, data)
     etimer_set(&et, 125);//CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     leds_on(0x01);
+		printf(".\n\0");
     etimer_set(&et,125);// CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     leds_off(0x01);
+		printf(".\n\0");
   }
 
  exit:
