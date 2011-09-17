@@ -63,6 +63,7 @@
 
 
 
+
 #define ANNOUNCE_BOOT 1
 #define DEBUG 1
 #if DEBUG
@@ -134,9 +135,13 @@ void initialize_lowlevel(void)
 	PRINTF("Start real timer\n\0");
 	rtimer_init();
 
-	/*process subsystem start*/
+	/*--- process subsystem start ---*/
 	PRINTF("Starting process subsystem..\n\n\0");
   process_init();
+
+	/*--- ctimer and radio stack init ---*/
+  ctimer_init();
+  NETSTACK_RADIO.init();
 
 #if ANNOUNCE_BOOT	
 	clock_wait(70);
@@ -153,7 +158,11 @@ int
 main(void)
 {
 
+	packet_count=0;
+	int old_count = packet_count;
 	int inc = 1;
+	int len=0;
+	char buf[10];
 	/*--- Setup platform and cpu specific subsystems ---*/
 	initialize_lowlevel();
   process_start(&etimer_process, NULL);
@@ -165,6 +174,11 @@ main(void)
 		watchdog_periodic();
 		process_run();
 
+		if (packet_count != old_count)
+		{printf("A packet received %d\n", packet_count);
+			old_count=packet_count;}
+
+#if 0
 		/*schedule a printf with increasing delay (from 1s to 10s)*/
 		if (rtimer_flag){
 			rtimer_set(&rt, RTIMER_NOW()+ RTIMER_ARCH_SECOND*inc, 
@@ -174,8 +188,11 @@ main(void)
 			PRINTF("I've slept %d seconds\n\0", inc-1);
 			//printf_P("RT delay: %d\n\0", inc);
 			if (++inc == 10) inc=1;
+			if ( NETSTACK_RADIO.send(inc, 2) < 0)
+				printf("send failed\n\0");
+			
 		}
-
+#endif
 	}
 
 	return 0;
