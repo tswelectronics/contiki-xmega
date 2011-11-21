@@ -1,9 +1,10 @@
-CONTIKI_TARGET_DIRS = . apps dev dev/lcd dev/avr-poe-buttons dev/xmega-adc
+CONTIKI_TARGET_DIRS = . dev dev/lcd dev/avr-poe-buttons dev/xmega-adc dev/xmega-signatures net
 
 CONTIKI_CORE=contiki-poe-main
 CONTIKI_TARGET_MAIN = ${CONTIKI_CORE}.o
-CONTIKI_TARGET_SOURCEFILES += contiki-poe-main.c lcd.c avr-poe-buttons.c xmega-adc.c
+CONTIKI_TARGET_SOURCEFILES += contiki-poe-main.c lcd.c avr-poe-buttons.c xmega-adc.c xmega-signatures.c eth-enc28j60.c
 #uip.c tcpip.c uip-split.c eth-enc28j60.c uip_arp.c
+
 
 CONTIKIAVR=$(CONTIKI)/cpu/avr
 CONTIKIBOARD=.
@@ -27,6 +28,6 @@ AVRDUDE_OPTIONS=-V
 
 
 
-include $(CONTIKIAVR)/Makefile.avr_emb
+include $(CONTIKIAVR)/Makefile.avr_scott
 #include $(CONTIKIAVR)/radio/Makefile.radio
 
