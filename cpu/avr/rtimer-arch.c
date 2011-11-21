@@ -44,7 +44,7 @@
 
 /* OBS: 8 seconds maximum time! */
 
-#include <avr/io.h>
+#include <avr/io.h> 
 #include <avr/interrupt.h>
 #include <stdio.h>
 
@@ -73,7 +73,7 @@
 #define TICIE3 ICIE3
 #endif
 
-#if defined(__AVR_ATxmega256a3__)
+#if defined(RTC_SYNCBUSY_bm)
 #ifdef TCNT3
 #undef TCNT3
 #endif
@@ -117,7 +117,8 @@ rtimer_arch_init(void)
   uint8_t sreg;
   sreg = SREG;
 
-#if defined(__AVR_ATxmega256A3__)
+
+#if defined(RTC_SYNCBUSY_bm)
 	/*
 	 * Setup RTC clock: (From ATXmega example software)
 	 * 	Start internal 32.768KHz Clock
@@ -163,7 +164,7 @@ rtimer_arch_init(void)
   TCCR3B |= 5;
 #else
 #error "No Timer3 in rtimer-arch.c"
-#endif /*__AVR_ATxmega2563__*/
+#endif
 
   /* Restore interrupt state */
   SREG = sreg;
@@ -176,7 +177,7 @@ rtimer_arch_schedule(rtimer_clock_t t)
   uint8_t sreg;
   sreg = SREG;
   cli ();
-#if defined(__AVR_ATxmega256A3__)
+#if defined(RTC_SYNCBUSY_bm)
 	uint16_t CNT_pre=RTC_CNT;
 	/*stop rtc clearing RTC*/ 
 	RTC.CTRL = 0x00;
