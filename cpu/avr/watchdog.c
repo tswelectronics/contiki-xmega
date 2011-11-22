@@ -75,7 +75,7 @@ watchdog_init(void)
 /*  Clear startup bit and disable the wdt, whether or not it will be used.
     Random code may have caused the last reset.
  */
-#if defined(__AVR_ATxmega256A3__)
+#if defined(WDT_ENABLE_bm)
 	WDT.CTRL |= WDT_CEN_bm;
 	WDT.CTRL &= ~(WDT_ENABLE_bm);
 #else
@@ -119,7 +119,7 @@ watchdog_stop(void)
 #if WATCHDOG_CONF_BALANCE
 	stopped++;
 #endif
-#if defined(__AVR_ATxmega256A3__)
+#if defined(WDT_ENABLE_bm)
 	WDT.CTRL |= WDT_CEN_bm;
 	WDT.CTRL &= ~(WDT_ENABLE_bm);
 #else
