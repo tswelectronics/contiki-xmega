@@ -34,7 +34,7 @@ void get_serial_number(char* dest, uint8_t len) {
         else if (len > 5) // 6
             *dest = prod_read(PROD_SIGNATURES_START + 0x10);
         else if (len==5)
-            *dest = 0x00;
+            *dest = 0x02;
         else if (len==4)
             *dest = 0x12;
         else if (len==3)
