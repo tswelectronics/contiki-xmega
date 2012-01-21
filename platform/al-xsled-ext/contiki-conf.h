@@ -32,6 +32,9 @@
 #define LED_STATUS LED1
 #define LED_ALERT LED2
 
+/* Watchdog */
+#define WATCHDOG_CONF_TIMEOUT WDT_PER_8KCLK_gc
+
 
 /* ? */
 #define CCIF
