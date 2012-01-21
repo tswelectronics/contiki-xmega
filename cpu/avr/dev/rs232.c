@@ -336,12 +336,15 @@ ISR(USARTC1_RXC_vect) { usart_generic_rx_vect(RS232_USARTC1); }
 
 /*---------------------------------------------------------------------------*/
 
-#if 1 //defined (__RS232_ATXMEGA__)
+#if defined (__RS232_ATXMEGA__)
 void
 rs232_init(uint8_t port, uint16_t bd, uint8_t ffmt)
 {
 	PORT_t *USART_port;
 	rs232_t *rs232 = &rs232_ports[port];
+
+	/* Disable interrupts. */
+	cli();
 
 	/* 
 	 * There are 2 USART's per physical port. So first we need to find the
@@ -358,7 +361,6 @@ rs232_init(uint8_t port, uint16_t bd, uint8_t ffmt)
 	*rs232->BAUDH = (uint8_t)(bd >> 8);
 
 	/* Control registers, set function last (¤21.5 XMEGA A Manual). */
-	/* TODO disable interrupts */
 	*rs232->INTERRUPT = USART_INTERRUPT_RX_COMPLETE | USART_INTERRUPT_TX_COMPLETE;
 	*rs232->FORMAT = ffmt;
 	*rs232->FUNCTION = USART_RECEIVER_ENABLE | USART_TRANSMITTER_ENABLE;
@@ -367,7 +369,8 @@ rs232_init(uint8_t port, uint16_t bd, uint8_t ffmt)
 	rs232->txwait = 0;
 	rs232->input_handler = NULL;
 
-	/* TODO enable interrupts */
+	/* Enable interrupts. */
+	sei();
 }
 #else /*__RS232_ATXMEGA__*/
 void
