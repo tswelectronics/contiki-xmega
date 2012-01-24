@@ -55,21 +55,9 @@
 #define F_CPU          32768000UL
 
 #include <stdint.h>
+#include <avrdef.h>
 #include <avr/io.h>
 
-
-typedef int32_t s32_t;
-typedef unsigned char u8_t;
-typedef unsigned short u16_t;
-typedef unsigned long u32_t;
-typedef unsigned short clock_time_t;
-typedef unsigned short uip_stats_t;
-typedef unsigned long off_t;
-
-void clock_delay(unsigned int us2);
-void clock_wait(int ms10);
-void clock_set_seconds(unsigned long s);
-unsigned long clock_seconds(void);
 
 /*define to setup system clock*/
 //#define __SYSTEM_CLOCK_SETUP__

@@ -47,20 +47,21 @@
  */
 
 #include <contiki-conf.h>
+#include <avrdef.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <dev/watchdog.h>
 
 #ifndef WATCHDOG_CONF_TIMEOUT
-#if defined(WDT_ENABLE_bm) /* XMEGA only */
-	#define WATCHDOG_CONF_TIMEOUT WDT_PER_2KCLK_gc
+#ifdef XMEGA
+#define WATCHDOG_CONF_TIMEOUT WDT_PER_2KCLK_gc
 #else
 	#define WATCHDOG_CONF_TIMEOUT WDTO_2S
 #endif
 #endif
 
-#if defined(WDT_ENABLE_bm) /* XMEGA only */
+#ifdef XMEGA
 #ifndef wdt_disable
 #define wdt_disable() \
 	uint8_t temp = (WDT.CTRL & ~WDT_ENABLE_bm) | WDT_CEN_bm; \
@@ -89,7 +90,7 @@ watchdog_init(void)
 /*  Clear startup bit and disable the wdt, whether or not it will be used.
     Random code may have caused the last reset.
  */
-#if defined(WDT_ENABLE_bm)	/* XMEGA only */
+#ifdef XMEGA
 	RST.STATUS |= RST_WDRF_bm;
 #else
 	MCUSR&=~(1<<WDRF);
@@ -110,7 +111,7 @@ watchdog_start(void)
 		return;
 #endif
 	wdt_enable(WATCHDOG_CONF_TIMEOUT);
-#if defined(WDT_ENABLE_bm)	/* XMEGA only */
+#ifdef XMEGA
 	while (WDT.STATUS & WDT_SYNCBUSY_bm);
 #endif
 #endif  
