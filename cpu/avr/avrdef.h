@@ -65,7 +65,8 @@ void clock_delay(unsigned int us2);
 void clock_wait(int ms10);
 void clock_set_seconds(unsigned long s);
 unsigned long clock_seconds(void);
-void   *sbrk(int);
+void *sbrk(int);
+uint8_t xmega_read_calibration_byte(uint8_t index);
 
 /* ?, uses SREG from avr/io.h. */
 typedef unsigned char spl_t;
