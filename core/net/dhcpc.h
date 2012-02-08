@@ -49,12 +49,15 @@ struct dhcpc_state {
   uip_ipaddr_t netmask;
   uip_ipaddr_t dnsaddr;
   uip_ipaddr_t default_router;
+  char* hostname;
 };
 
 void dhcpc_init(const void *mac_addr, int mac_len);
 void dhcpc_request(void);
 
 void dhcpc_appcall(process_event_t ev, void *data);
+
+void dhcpc_set_hostname_p(char *);
 
 /* Mandatory callbacks provided by the user. */
 void dhcpc_configured(const struct dhcpc_state *s);

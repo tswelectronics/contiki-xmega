@@ -35,9 +35,11 @@
 #define __RTIMER_ARCH_H__
 
 #include <avr/interrupt.h>
+#include <avr/io.h>
 
 /* Will affect radio on/off timing for cx-mac */
-#if defined(__AVR_ATxmega256A3__)
+#if defined(RTC_CNT)
+/* catches all Xmegas */
 #define RTIMER_ARCH_SECOND (1024)
 #else
 #define RTIMER_ARCH_SECOND (8192)
@@ -49,7 +51,8 @@
    in contiki-conf later! */
 #if defined(TCNT3)
 #define rtimer_arch_now() (TCNT3)
-#elif defined(__AVR_ATxmega256A3__)
+/* catches all Xmegas */
+#elif defined(RTC_CNT)
 #define rtimer_arch_now() (RTC_CNT)
 #else
 #error "No RTC avaliable"

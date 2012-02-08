@@ -30,6 +30,8 @@
  *
  * @(#)$$
  */
+
+
 #define ANNOUNCE_BOOT 1    //adds about 600 bytes to program size
 
 #define DEBUG 0

@@ -375,7 +375,7 @@ uip_arp_out(void)
      packet with an ARP request for the IP address. */
 
   /* First check if destination is a local broadcast. */
-  if(uip_ipaddr_cmp(&IPBUF->destipaddr, &uip_broadcast_addr)) {
+  if(uip_ipaddr_broadcast_test_addr(&IPBUF->destipaddr)) {
     memcpy(IPBUF->ethhdr.dest.addr, broadcast_ethaddr.addr, 6);
   } else if(IPBUF->destipaddr.u8[0] == 224) {
     /* Multicast. */

@@ -1053,21 +1053,17 @@ struct uip_udp_conn *uip_udp_new(const uip_ipaddr_t *ripaddr, u16_t rport);
 
 
 /**
- * Check if an address is a broadcast address for a network.
+ * Check if an address is a broadcast address for the network we're on.
  *
- * Checks if an address is the broadcast address for a network. The
- * network is defined by an IP address that is on the network and the
- * network's netmask.
+ * Checks if an address is the broadcast address for our network. The
+ * network is defined by uip_netmask and the network's netmask.
  *
  * \param addr The IP address.
- * \param netaddr The network's IP address.
- * \param netmask The network's netmask.
  *
  * \hideinitializer
  */
-/*#define uip_ipaddr_isbroadcast(addr, netaddr, netmask)
-  ((uip_ipaddr_t *)(addr)).u16 & ((uip_ipaddr_t *)(addr)).u16*/
 
+extern int uip_ipaddr_broadcast_test_addr(uip_ipaddr_t *);
 
 
 /**

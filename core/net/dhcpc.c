@@ -128,6 +128,22 @@ add_req_options(u8_t *optptr)
   *optptr++ = DHCP_OPTION_SUBNET_MASK;
   *optptr++ = DHCP_OPTION_ROUTER;
   *optptr++ = DHCP_OPTION_DNS_SERVER;
+
+  return optptr;
+}
+
+/*---------------------------------------------------------------------------*/
+static u8_t *
+add_hostname_options(u8_t *optptr)
+{
+   if (s.hostname != NULL) {
+   
+    u8_t len = strnlen(s.hostname, 32);
+    *optptr++ = 0x0c;
+    *optptr++ = len;
+    memcpy(optptr, s.hostname, len);
+    optptr += len;
+   }
   return optptr;
 }
 /*---------------------------------------------------------------------------*/
@@ -173,8 +189,8 @@ send_discover(void)
 
   end = add_msg_type(&m->options[4], DHCPDISCOVER);
   end = add_req_options(end);
+  end = add_hostname_options(end);
   end = add_end(end);
-
   uip_send(uip_appdata, (int)(end - (u8_t *)uip_appdata));
 }
 /*---------------------------------------------------------------------------*/
@@ -189,6 +205,7 @@ send_request(void)
   end = add_msg_type(&m->options[4], DHCPREQUEST);
   end = add_server_id(end);
   end = add_req_ipaddr(end);
+  end = add_hostname_options(end);
   end = add_end(end);
   
   uip_send(uip_appdata, (int)(end - (u8_t *)uip_appdata));
@@ -405,7 +422,8 @@ dhcpc_init(const void *mac_addr, int mac_len)
 
   s.state = STATE_INITIAL;
   uip_ipaddr(&addr, 255,255,255,255);
-  s.conn = udp_new(&addr, UIP_HTONS(DHCPC_SERVER_PORT), NULL);
+  //s.conn = udp_new(&addr, UIP_HTONS(DHCPC_SERVER_PORT), NULL);
+  s.conn = udp_broadcast_new(UIP_HTONS(DHCPC_SERVER_PORT), NULL);
   if(s.conn != NULL) {
     udp_bind(s.conn, UIP_HTONS(DHCPC_CLIENT_PORT));
   }
@@ -431,4 +449,9 @@ dhcpc_request(void)
     handle_dhcp(PROCESS_EVENT_NONE, NULL);
   }
 }
+/*---------------------------------------------------------------------------*/
+void dhcpc_set_hostname_p(char * namein) {
+  s.hostname = namein;
+}
+
 /*---------------------------------------------------------------------------*/

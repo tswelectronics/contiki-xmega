@@ -113,6 +113,9 @@ const uip_ipaddr_t uip_broadcast_addr =
 #else /* UIP_CONF_IPV6 */
   { { 0xff, 0xff, 0xff, 0xff } };
 #endif /* UIP_CONF_IPV6 */
+
+const uip_ipaddr_t uip_lbroadcast_addr = { { 192, 168, 1, 0xff } };
+
 const uip_ipaddr_t uip_all_zeroes_addr = { { 0x0, /* rest is 0 */ } };
 
 #if UIP_FIXEDETHADDR
@@ -235,6 +238,49 @@ void uip_log(char *msg);
 #else
 #define UIP_LOG(m)
 #endif /* UIP_LOGGING == 1 */
+
+
+int uip_ipaddr_broadcast_test_addr(uip_ipaddr_t * addr)
+{
+    //addr1 is the external address, addr2 is the address to match
+    uip_ipaddr_t masked, masked1;
+
+    //are the addresses equal?
+    if (uip_ipaddr_cmp(addr, &uip_hostaddr)) return 1;
+
+    //broadcast to 255.255.255.255 ?
+    if (uip_ipaddr_cmp(addr, &uip_broadcast_addr)) return 1;
+
+    //broadcast to 0.0.0.0 ?
+    if (uip_ipaddr_cmp(addr, &uip_all_zeroes_addr)) return 1;
+
+    //Test if the address is a broadcast to a subnet
+    masked.u16[0]=addr->u16[0] & uip_netmask.u16[0];
+    masked.u16[1]=addr->u16[1] & uip_netmask.u16[1];
+
+    masked1.u16[0]=uip_hostaddr.u16[0] & uip_netmask.u16[0];
+    masked1.u16[1]=uip_hostaddr.u16[1] & uip_netmask.u16[1];
+
+    //Check wether the masked IP addresses are correct (same subnet)
+    if (!uip_ipaddr_cmp(&masked, &masked1)) {
+      //printf("wrong subnet\n");
+        return 0;
+    }
+
+    //same subnet, now test whether the remaining bits are all set to 1
+    masked.u16[0]=addr->u16[0] | uip_netmask.u16[0];
+    masked.u16[1]=addr->u16[1] | uip_netmask.u16[1];
+
+    //If masked is all_ones, then a message was sent to subnet.allones
+    //like 192.168.1.255
+    if (uip_ipaddr_cmp(&masked, &uip_broadcast_addr)){
+        return 1;
+    }
+
+    //printf("just not a bcast...\n");
+    return 0;
+}
+
 
 #if ! UIP_ARCH_ADD32
 void
@@ -908,8 +954,10 @@ uip_process(u8_t flag)
 #if UIP_BROADCAST
     DEBUG_PRINTF("UDP IP checksum 0x%04x\n", uip_ipchksum());
     if(BUF->proto == UIP_PROTO_UDP &&
-       (uip_ipaddr_cmp(&BUF->destipaddr, &uip_broadcast_addr) ||
-	(BUF->destipaddr.u8[0] & 224) == 224)) {  /* XXX this is a
+       ((uip_ipaddr_cmp(&BUF->destipaddr, &uip_broadcast_addr)||
+  ((BUF->destipaddr.u8[3]) == 255)) ||
+	(BUF->destipaddr.u8[0] & 224) == 224)) {
+                 /* XXX this is a
 						     hack to be able
 						     to receive UDP
 						     multicast
@@ -920,7 +968,9 @@ uip_process(u8_t flag)
 						     prefix. */
       goto udp_input;
     }
-#endif /* UIP_BROADCAST */
+#endif
+
+/* UIP_BROADCAST */
     
     /* Check if the packet is destined for our IP address. */
 #if !UIP_CONF_IPV6
@@ -1122,12 +1172,14 @@ uip_process(u8_t flag)
        connection is bound to a remote port. Finally, if the
        connection is bound to a remote IP address, the source IP
        address of the packet is checked. */
+    //printf("ports: %d, %d,  %d, %d\n", UIP_HTONS(uip_udp_conn->rport), UIP_HTONS(uip_udp_conn->lport), UIP_HTONS(UDPBUF->srcport), UIP_HTONS(UDPBUF->destport));
     if(uip_udp_conn->lport != 0 &&
        UDPBUF->destport == uip_udp_conn->lport &&
        (uip_udp_conn->rport == 0 ||
         UDPBUF->srcport == uip_udp_conn->rport) &&
        (uip_ipaddr_cmp(&uip_udp_conn->ripaddr, &uip_all_zeroes_addr) ||
 	uip_ipaddr_cmp(&uip_udp_conn->ripaddr, &uip_broadcast_addr) ||
+	uip_ipaddr_broadcast_test_addr(&(BUF->destipaddr)) ||
 	uip_ipaddr_cmp(&BUF->srcipaddr, &uip_udp_conn->ripaddr))) {
       goto udp_found;
     }
