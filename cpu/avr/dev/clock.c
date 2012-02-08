@@ -115,12 +115,18 @@ clock_init(void)
 #ifndef XMEGA_CLOCK_SOURCE
 #define XMEGA_CLOCK_SOURCE 0
 #endif
-	OSC.CTRL = XMEGA_OSC_SOURCE;
-	while (!(OSC.STATUS & XMEGA_OSC_SOURCE));
-	CCP = CCP_IOREG_gc;
-	CLK.CTRL = XMEGA_CLOCK_SOURCE;
-	CCP = CCP_IOREG_gc;
-	CLK.LOCK |= CLK_LOCK_bm;
+	if ((CLK.LOCK & CLK_LOCK_bm) == 0) {
+		/* Clock is not setup, setup now. */
+		if (XMEGA_OSC_SOURCE) {
+			/* Enable an oscillator. */
+			OSC.CTRL |= XMEGA_OSC_SOURCE;
+			while (!(OSC.STATUS & XMEGA_OSC_SOURCE));
+		}
+		CCP = CCP_IOREG_gc;
+		CLK.CTRL = XMEGA_CLOCK_SOURCE;
+		CCP = CCP_IOREG_gc;
+		CLK.LOCK |= CLK_LOCK_bm;
+	}
 #endif
 	OCRSetup();
 	sei();

@@ -99,7 +99,9 @@ void setup_clock(void) {
     //CLK.PSCTRL = (CLK.PSCTRL & ~(CLK_PSBCDIV_gm) )| CLK_PSBCDIV_2_2_gc;
     CLK.PSCTRL = 0b00000011;
     
-
+    /* Lock the clock so that clock_init does not adjust later. */
+    CCP = CCP_IOREG_gc;
+    CLK.LOCK |= CLK_LOCK_bm;
 }
 
 void setup_board(void) {

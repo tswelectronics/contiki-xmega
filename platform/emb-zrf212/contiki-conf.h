@@ -60,7 +60,10 @@
 
 
 /*define to setup system clock*/
-//#define __SYSTEM_CLOCK_SETUP__
+#define XMEGA_OSC_SOURCE 0 /* No change. */
+#define XMEGA_CLOCK_SOURCE (CLK_SCLKSEL0_bm | CLK_SCLKSEL1_bm) /* External */
+#define XMEGA_TIMER_TOP 256
+#define XMEGA_TIMER_PRE TC_CLKSEL_DIV1024_gc
 
 /* Maximum timer interval for 16 bit clock_time_t */
 #define INFINITE_TIME 0xffff

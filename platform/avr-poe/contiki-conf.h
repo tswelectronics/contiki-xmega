@@ -54,6 +54,10 @@
 /* Clock ticks per second */
 #define CLOCK_CONF_SECOND 100
 
+/* Clock setup */
+#define XMEGA_TIMER_TOP 256
+#define XMEGA_TIMER_PRE TC_CLKSEL_DIV1024_gc
+
 /* Maximum time interval (used for timers) */
 #define INFINITE_TIME 0xffff
 

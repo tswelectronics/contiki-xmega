@@ -104,9 +104,6 @@ void initialize_lowlevel(void)
 	interrupt_init(int_level);
 
 	/*--- Setup system clock (if required) and start timer --- */
-#if defined(__SYSTEM_CLOCK_SETUP__)
-	system_clock_init();
-#endif /* __SYSTEM_CLOCK_SETUP__*/
 	clock_init();
 
 	/*--- Setup serial port on USARTD0 ---*/
