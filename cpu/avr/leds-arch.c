@@ -44,33 +44,30 @@
 #include "contiki-conf.h"
 #include "dev/leds.h"
 
-/*---------------------------------------------------------------------------*/
 void
 leds_arch_init(void)
 {
-#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
+#if defined(__USE_LEDS__)
 	LEDPORT.DIR |= LEDS_CONF_ALL;
-#endif /*AVR_ATxmega256A3 && __USE_LEDS__ */
+	LEDPORT.OUT |= LEDS_CONF_ALL;
+#endif /* __USE_LEDS__ */
 }
-/*---------------------------------------------------------------------------*/
+
 unsigned char
 leds_arch_get(void)
 {
-	unsigned char leds=0;
-#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
-	leds = (unsigned char) LEDPORT.OUT & LEDS_ALL;
-#endif/*AVR_ATxmega256A3 && __USE_LEDS__ */
+	unsigned char leds = 0;
+#if defined(__USE_LEDS__)
+	leds = ~LEDPORT.OUT & LEDS_CONF_ALL;
+#endif/* __USE_LEDS__ */
 	return leds;
 }
-/*---------------------------------------------------------------------------*/
+
 void
 leds_arch_set(unsigned char leds)
 {
-#if defined(__AVR_ATxmega256A3__) && defined(__USE_LEDS__)
-	LEDPORT.OUTSET = (leds&LEDS_CONF_ALL);
-	LEDPORT.OUTCLR = ((~leds)&LEDS_CONF_ALL);
-#endif /*AVR_ATxmega256A3 && __USE_LEDS__ */
-
-
+#if defined(__USE_LEDS__)
+	leds = ~leds & LEDS_CONF_ALL;
+	LEDPORT.OUT = (LEDPORT.OUT & ~LEDS_CONF_ALL) | leds;
+#endif /* __USE_LEDS__ */
 }
-/*---------------------------------------------------------------------------*/
