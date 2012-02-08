@@ -20,7 +20,6 @@
 #endif
 
 
-
 /**
  *
  */
@@ -51,14 +50,12 @@ static void initalize(void)
 	watchdog_start();
 
 	/* Clock */
-#if defined(__SYSTEM_CLOCK_SETUP__)
-	//system_clock_init();
-#endif
 	clock_init();
 
 	/* Process subsystem */
 	dprintf("Starting process subsystem\n");
 	process_init();
+	process_start(&etimer_process, NULL);
 	autostart_start(autostart_processes);
 }
 
