@@ -55,6 +55,7 @@
 #define F_CPU          32768000UL
 
 #include <stdint.h>
+#include <avrdef.h>
 #include <avr/io.h>
 
 

@@ -111,7 +111,7 @@ void initialize_lowlevel(void)
 	clock_init();
 
 	/*--- Setup serial port on USARTD0 ---*/
-	rs232_init(RS232_PORT_0, XMEGA_USART_CALC(9600), 
+	rs232_init(RS232_PORT_0, XMEGA_BAUD_ASYNC_9600,
 			(chsize | pmode | cmode | smode) );
 	rs232_redirect_stdout(RS232_PORT_0);
 

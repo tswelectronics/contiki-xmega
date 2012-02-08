@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2012, Timothy Rule.
+# All rights reserved.
+#
+# Make file for AL-XSLED_EXT Development Board with ATXmega256a3 and Micro-SD.
+#
+
+CONTIKI_TARGET_DIRS = .
+CONTIKI_CORE=contiki-main
+CONTIKI_TARGET_MAIN = ${CONTIKI_CORE}.o
+CONTIKI_TARGET_SOURCEFILES += contiki-main.c
+#$(wildcard *.c)
+
+CONTIKIAVR=$(CONTIKI)/cpu/avr
+CONTIKIBOARD=.
+CONTIKI_PLAT_DEFS = -DF_CPU=32768000UL -DAUTO_CRC_PADDING=2 -DAUTOSTART_ENABLE
+MCU=atxmega256a3
+
+AVRDUDE_PROGRAMMER=avrispmkII
+AVRDUDE_PORT=usb
+AVRDUDE_OPTIONS=-V					# Verify off
+
+# include $(CONTIKIAVR)/Makefile.avrxmega
+include $(CONTIKIAVR)/Makefile.avr_scott
