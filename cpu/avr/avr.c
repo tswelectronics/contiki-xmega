@@ -38,7 +38,7 @@ sbrk(int incr)
   return old_break;
 }
 
-#ifdef XMEGA
+#ifdef __XMEGA__
 #include <avr/pgmspace.h>
 
 uint8_t xmega_read_calibration_byte(uint8_t index)

@@ -54,14 +54,14 @@
 #include <dev/watchdog.h>
 
 #ifndef WATCHDOG_CONF_TIMEOUT
-#ifdef XMEGA
+#ifdef __XMEGA__
 #define WATCHDOG_CONF_TIMEOUT WDT_PER_2KCLK_gc
 #else
 	#define WATCHDOG_CONF_TIMEOUT WDTO_2S
 #endif
 #endif
 
-#ifdef XMEGA
+#ifdef __XMEGA__
 #ifndef wdt_disable
 #define wdt_disable() \
 	uint8_t temp = (WDT.CTRL & ~WDT_ENABLE_bm) | WDT_CEN_bm; \
@@ -90,7 +90,7 @@ watchdog_init(void)
 /*  Clear startup bit and disable the wdt, whether or not it will be used.
     Random code may have caused the last reset.
  */
-#ifdef XMEGA
+#ifdef __XMEGA__
 	RST.STATUS |= RST_WDRF_bm;
 #else
 	MCUSR&=~(1<<WDRF);
@@ -111,7 +111,7 @@ watchdog_start(void)
 		return;
 #endif
 	wdt_enable(WATCHDOG_CONF_TIMEOUT);
-#ifdef XMEGA
+#ifdef __XMEGA__
 	while (WDT.STATUS & WDT_SYNCBUSY_bm);
 #endif
 #endif  

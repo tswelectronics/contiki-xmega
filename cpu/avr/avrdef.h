@@ -84,8 +84,8 @@ static inline spl_t splhigh(void) { spl_t s = SREG; cli(); return s; }
 || defined(__AVR_ATxmega192A3__) \
 || defined(__AVR_ATxmega256A3__) \
 || defined(__AVR_ATxmega256A3B__)
-#define XMEGA
-#define XMEGA_A
+#define __XMEGA__
+#define __XMEGA_A__
 #endif
 
 #if defined(__AVR_ATxmega16D4__) \
@@ -94,8 +94,8 @@ static inline spl_t splhigh(void) { spl_t s = SREG; cli(); return s; }
 || defined(__AVR_ATxmega128D3__) \
 || defined(__AVR_ATxmega192D3__) \
 || defined(__AVR_ATxmega256D3__)
-#define XMEGA
-#define XMEGA_D
+#define __XMEGA__
+#define __XMEGA_D__
 #endif
 
 #endif /* AVRDEF_H */
