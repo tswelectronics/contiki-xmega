@@ -59,6 +59,20 @@
 #include <avr/io.h>
 
 
+int packet_count;
+typedef int32_t s32_t;
+typedef unsigned char u8_t;
+typedef unsigned short u16_t;
+typedef unsigned long u32_t;
+typedef unsigned short clock_time_t;
+typedef unsigned short uip_stats_t;
+typedef unsigned long off_t;
+
+void clock_delay(unsigned int us2);
+void clock_wait(int ms10);
+void clock_set_seconds(unsigned long s);
+unsigned long clock_seconds(void);
+
 /*define to setup system clock*/
 #define XMEGA_OSC_SOURCE 0 /* No change. */
 #define XMEGA_CLOCK_SOURCE (CLK_SCLKSEL0_bm | CLK_SCLKSEL1_bm) /* External */
@@ -93,12 +107,6 @@
 /* COM port to be used for SLIP connection.*/
 #define SLIP_PORT RS232_PORT_0 /*XXX Don't Know.. set it to RS232 Port!*/
 
-/* Pre-allocated memory for loadable modules heap space (in bytes)*/
-/* Default is 4096. Currently used only when elfloader is present. Not tested on Raven */
-//#define MMEM_CONF_SIZE 256
-
-/* Starting address for code received via the codeprop facility. Not tested on Raven */
-//#define EEPROMFS_ADDR_CODEPROP 0x8000
 
 /* Network setup. The new NETSTACK interface requires RF230BB (as does ip4) */
 #if RF230BB
@@ -185,7 +193,7 @@
 #define NETSTACK_CONF_RADIO       rf230_driver
 #define CHANNEL_802_15_4          26
 /* AUTOACK receive mode gives better rssi measurements, even if ACK is never requested */
-#define RF230_CONF_AUTOACK        1
+#define RF230_CONF_AUTOACK        0
 /* Request 802.15.4 ACK on all packets sent (else autoretry). This is primarily for testing. */
 #define SICSLOWPAN_CONF_ACK_ALL   0
 /* Number of auto retry attempts 0-15 (0 implies don't use extended TX_ARET_ON mode with CCA) */
