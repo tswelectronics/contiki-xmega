@@ -147,8 +147,12 @@ PROCESS_THREAD(on_chip_sensors_display_process, ev, data)
 		dprintf("ADC result (temp/vcc/bandgap) %04x : %04x : %04x\n",
 				on_chip_temp, on_chip_vcc, on_chip_bandgap);
 
+		/*
+		 * Cal temp is at 85¡C, but using the value as if at 85 ¡F gives
+		 * conversions that make more sense. So use 29.4¡C (== 85¡C).
+		 */
 		int32_t temp = on_chip_temp;
-		temp = ((85.0 + 273.0)/calibration_temp) * temp - 273;
+		temp = ((29.4 + 273.0)/calibration_temp) * temp - 273;
 		dprintf("ADC temp (degC) %d\n", temp);
 
 		int32_t vcc = on_chip_vcc;
