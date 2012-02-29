@@ -29,21 +29,54 @@
 
 /**
  * @file
- * 		Sample apps for AL-XSLED-EXT.
+ * 		SD functions specific to AL-XSLED-EXT.
  * @author
  * 		Timothy Rule <trule.github@nym.hush.com>
  */
 
-#include <contiki.h>
-#include <autostart.h>
+#include <stdint.h>
+#include <avr/io.h>
+#include <spi_xmega.h>
 
-PROCESS_NAME(hello_world_process);
-PROCESS_NAME(on_chip_sensors_monitor_process);
-PROCESS_NAME(on_chip_sensors_display_process);
+extern int8_t sd_fd;
 
-AUTOSTART_PROCESSES(
-	&hello_world_process,
-	&on_chip_sensors_monitor_process,
-	&on_chip_sensors_display_process
-);
+int sd_arch_init(void *desc)
+{
+	spi_xmega_slave_t *d = (spi_xmega_slave_t *)desc;
 
+	if (sd_fd < 0) {
+		return sd_fd;
+	}
+
+	spi_lock(sd_fd);
+	d->ss_port->OUTSET = d->ss_bm;
+
+	int i = 10;
+	uint8_t data = 0;
+	while (--i) {
+		spi_write(sd_fd, &data, 1);
+	}
+
+	spi_unlock(sd_fd);
+
+	return sd_fd;
+}
+
+void sd_arch_spi_write(uint8_t c)
+{
+	spi_write(sd_fd, &c, 1);
+}
+
+void sd_arch_spi_write_block(uint8_t *bytes, int amount)
+{
+	spi_write(sd_fd, bytes, amount);
+}
+
+unsigned sd_arch_spi_read(void)
+{
+	uint8_t r;
+
+	spi_read(sd_fd, &r, 1);
+
+	return r;
+}

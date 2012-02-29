@@ -29,21 +29,43 @@
 
 /**
  * @file
- * 		Sample apps for AL-XSLED-EXT.
+ * 		SD settings specific to AL-XSLED-EXT.
  * @author
  * 		Timothy Rule <trule.github@nym.hush.com>
  */
 
-#include <contiki.h>
-#include <autostart.h>
+#ifndef SD_ARCH_H
+#define SD_ARCH_H
 
-PROCESS_NAME(hello_world_process);
-PROCESS_NAME(on_chip_sensors_monitor_process);
-PROCESS_NAME(on_chip_sensors_display_process);
+#include <stdint.h>
+#include <spi_xmega.h>
 
-AUTOSTART_PROCESSES(
-	&hello_world_process,
-	&on_chip_sensors_monitor_process,
-	&on_chip_sensors_display_process
-);
 
+extern int8_t sd_fd;
+
+#ifndef U1IFG
+#define U1IFG		IFG2
+#endif /* U1IFG */
+
+#define MS_DELAY(x) clock_delay(354 * (x))
+
+/* Machine-dependent macros. */
+#define LOCK_SPI()		spi_lock(sd_fd)
+#define UNLOCK_SPI()	spi_unlock(sd_fd)
+#define SD_CONNECTED()	!(PORTC.IN & PIN3_bm)
+#define LOWER_CS()
+#define RAISE_CS()
+
+/* Configuration parameters. */
+#define SD_TRANSACTION_ATTEMPTS		512
+#define SD_READ_RESPONSE_ATTEMPTS	8
+#define SD_READ_BLOCK_ATTEMPTS		2
+#define SD_MSK_OCR_33				0xc0
+#define SD_VCC						SD_MSK_OCR_33
+
+int sd_arch_init(void *desc);
+void sd_arch_spi_write(uint8_t c);
+void sd_arch_spi_write_block(uint8_t *bytes, int amount);
+unsigned sd_arch_spi_read(void);
+
+#endif /* !SD_ARCH_H */

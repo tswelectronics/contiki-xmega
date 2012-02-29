@@ -38,6 +38,7 @@
 #include <contiki.h>
 #include <autostart.h>
 #include <interrupt.h>
+#include <sd.h>
 #include <spi_xmega.h>
 #include <dev/watchdog.h>
 #include <dev/rs232.h>
@@ -61,96 +62,19 @@ static spi_xmega_slave_t spi_slaves [] = {
 		&SPIC.STATUS,
 		&PORTC,
 		PIN4_bm,
-		SPI_MODE_0_gc | SPI_PRESCALER_DIV64_gc,
+		SPI_CLK2X_bm | SPI_MODE_0_gc | SPI_PRESCALER_DIV16_gc, /* 250KHz */
 		0
 	},
 };
 
-static int8_t sd_fd;
-
+int8_t sd_fd  = -1;
 
 /**
- * Test SD interface.
+ *
  */
-#define SD_TRANSACTION_ATTEMPTS		512
-#define SD_READ_RESPONSE_ATTEMPTS	8
-#define SPI_IDLE	0xff
-#define GO_IDLE_STATE		0
-#define R1			1
-#define R2			2
-#define R3			5
-#define R7			5
-
-void send_command(uint8_t cmd, uint32_t argument)
-{
-	uint8_t req[8];
-
-	req[0] = SPI_IDLE;
-	req[1] = 0x40 | cmd;
-	req[2] = argument >> 24;
-	req[3] = argument >> 16;
-	req[4] = argument >> 8;
-	req[5] = argument;
-	req[6] = 0x95;
-	req[7] = SPI_IDLE;
-
-	spi_write(sd_fd, req, 8);
-}
-
-static uint8_t * get_response(int length)
-{
-	int i;
-	static uint8_t r[R7];
-
-	for (i = 0; i < SD_READ_RESPONSE_ATTEMPTS; i++) {
-		spi_read(sd_fd, r, 1);
-
-		if((r[0] & 0x80) == 0) {
-			/* A get_response byte is indicated by the MSB being 0. */
-			break;
-		}
-	}
-
-	if (i == SD_READ_RESPONSE_ATTEMPTS) {
-		return NULL;
-	}
-
-	spi_read(sd_fd, &r[1], length - 1);
-
-	return r;
-}
-
-static unsigned char *transaction(int command, unsigned long argument,
-	int response_type, unsigned attempts)
-{
-	unsigned i;
-	unsigned char *r;
-
-	if (spi_lock(sd_fd)) {
-		dprintf("spi busy\n");
-		return NULL;
-	}
-
-	r = NULL;
-	for (i = 0; i < attempts; i++) {
-		send_command(command, argument);
-		r = get_response(response_type);
-		if(r != NULL) {
-			break;
-		}
-	}
-
-	spi_unlock(sd_fd);
-
-	return r;
-}
-
 static void sd_init(void)
 {
-	if (PORTC.IN & PIN3_bm) {
-		dprintf("microSD card is not inserted\n");
-		return;
-	}
+	int rc;
 
 	sd_fd = spi_open(&spi_slaves[0]);
 	if (sd_fd < 0) {
@@ -158,16 +82,11 @@ static void sd_init(void)
 		return;
 	}
 
-	/* Send go idle. */
-	uint8_t *r;
-	r = transaction(GO_IDLE_STATE, 0, R1, SD_TRANSACTION_ATTEMPTS);
-	if (r != NULL) {
-		dprintf("Go-idle result: %d\n", r[0]);
-	} else {
-		dprintf("Failed to get go-idle response\n");
+	rc = sd_initialize(&spi_slaves[0]);
+	if (rc != 0) {
+		dprintf("SD init result %d\n", rc);
+		return;
 	}
-
-	spi_close(sd_fd);
 }
 
 
@@ -204,7 +123,7 @@ static void initalize(void)
 	/* Clock */
 	clock_init();
 
-	/* SPI */
+	/* SPI Busses */
 	spi_init_multi(spi_slaves, 1);
 	sd_init();
 
