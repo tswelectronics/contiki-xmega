@@ -38,12 +38,12 @@
  * Instructions for use.
  *
  * In platform code:
- * 	1/ Include <spi_xmega.h>.
+ * 	1/ Include <spi-xmega.h>.
  * 	2/ Define array of spi_xmega_slave_t for each slave.
  * 	3/ Call spi_init and spi_open, pass returned "fd" to library init func's.
  *
  * In cpu code:
- * 	1/ Add AVR += spi_xmega.c to avr/Makefile.xmega.
+ * 	1/ Add AVR += spi-xmega.c to avr/Makefile.xmega.
  *
  * In library code:
  * 	1/ Using "fd" from init, call spi_lock, spi_write, spi_read & spi_unlock.
@@ -51,7 +51,7 @@
 
 #include <stdint.h>
 #include <avr/io.h>
-#include <spi_xmega.h>
+#include <spi-xmega.h>
 
 #define IDLE	0
 #define OPEN	0x01

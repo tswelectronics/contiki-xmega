@@ -39,7 +39,7 @@
 #include <autostart.h>
 #include <interrupt.h>
 #include <sd.h>
-#include <spi_xmega.h>
+#include <spi-xmega.h>
 #include <dev/watchdog.h>
 #include <dev/rs232.h>
 #include <dev/leds.h>

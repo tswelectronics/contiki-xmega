@@ -36,7 +36,7 @@
 
 #include <stdint.h>
 #include <avr/io.h>
-#include <spi_xmega.h>
+#include <spi-xmega.h>
 
 extern int8_t sd_fd;
 
