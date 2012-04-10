@@ -27,22 +27,44 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __SPI_XMEGA_H__
-#define __SPI_XMEGA_H__
+/**
+ * @file
+ * 		Platform for AL-XSLED-EXT.
+ * @author
+ * 		Timothy Rule <trule.github@nym.hush.com>
+ * 		based on work from:
+ * 		Nicolas Tsiftes <nvt@sics.se>
+ */
 
-#include <stdint.h>
-#include <avr/io.h>
-#include <spi.h>
+#include <string.h>
+#include <sd.h>
+#include "cfs-coffee-arch.h"
 
-typedef struct {
-	volatile PORT_t *port;
-	volatile uint8_t *data;
-	volatile uint8_t *ctrl;
-	volatile uint8_t *status;
-	volatile PORT_t *ss_port;
-	uint8_t ss_bm;
-	uint8_t ctrl_bm;
-	uint8_t state;
-} spi_xmega_slave_t;
 
-#endif /* __SPI_XMEGA_H__ */
+/**
+ * cfs_coffee_arch_erase
+ *
+ * Note, this erases by writing 0's. Depending on media writing 1's may be
+ * more appropriate.
+ */
+int cfs_coffee_arch_erase(unsigned sector)
+{
+	char buf[SD_DEFAULT_BLOCK_SIZE];
+	sd_offset_t start_offset;
+	sd_offset_t end_offset;
+	sd_offset_t offset;
+
+	memset(buf, 0, sizeof(buf));
+
+	start_offset = COFFEE_START + sector * COFFEE_SECTOR_SIZE;
+	end_offset = start_offset + COFFEE_SECTOR_SIZE;
+
+	for (offset = start_offset; offset < end_offset;
+			offset += SD_DEFAULT_BLOCK_SIZE) {
+		if (sd_write(offset, (unsigned char *)buf, sizeof(buf)) < 0) {
+			return -1;
+		}
+		watchdog_periodic();
+	}
+	return 0;
+}

@@ -27,22 +27,48 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __SPI_XMEGA_H__
-#define __SPI_XMEGA_H__
+/**
+ * @file
+ * 		Platform for AL-XSLED-EXT.
+ * @author
+ * 		Timothy Rule <trule.github@nym.hush.com>
+ * 		based on work from:
+ * 		Nicolas Tsiftes <nvt@sics.se>
+ */
 
-#include <stdint.h>
-#include <avr/io.h>
-#include <spi.h>
+#ifndef CFS_COFFEE_ARCH_H
+#define CFS_COFFEE_ARCH_H
 
-typedef struct {
-	volatile PORT_t *port;
-	volatile uint8_t *data;
-	volatile uint8_t *ctrl;
-	volatile uint8_t *status;
-	volatile PORT_t *ss_port;
-	uint8_t ss_bm;
-	uint8_t ctrl_bm;
-	uint8_t state;
-} spi_xmega_slave_t;
+#include "contiki-conf.h"
+#include "dev/sd.h"
 
-#endif /* __SPI_XMEGA_H__ */
+/* Coffee configuration parameters. */
+#define COFFEE_SECTOR_SIZE		(10*1024*1024UL)
+#define COFFEE_PAGE_SIZE		1024UL
+#define COFFEE_START			0
+#define COFFEE_SIZE				(COFFEE_SECTOR_SIZE * 2)
+#define COFFEE_NAME_LENGTH		16
+#define COFFEE_MAX_OPEN_FILES	6
+#define COFFEE_FD_SET_SIZE		8
+#define COFFEE_LOG_TABLE_LIMIT	256
+#define COFFEE_DYN_SIZE			32*1024UL
+#define COFFEE_LOG_SIZE			8*1024UL
+#define COFFEE_MICRO_LOGS		0
+
+/* Flash operations. */
+#define COFFEE_WRITE(buf, size, offset)				\
+		sd_write(COFFEE_START + (offset), (unsigned char *)(buf), (size))
+
+#define COFFEE_READ(buf, size, offset)				\
+  		sd_read(COFFEE_START + (offset), (unsigned char *)buf, (size))
+
+#define COFFEE_ERASE(sector)					\
+		cfs_coffee_arch_erase(sector)
+
+/* Coffee types. */
+typedef int16_t coffee_page_t;
+typedef sd_offset_t coffee_offset_t;
+
+int cfs_coffee_arch_erase(unsigned);
+
+#endif /* !COFFEE_ARCH_H */

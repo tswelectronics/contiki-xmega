@@ -38,6 +38,7 @@
 #include <contiki.h>
 #include <autostart.h>
 #include <interrupt.h>
+#include <cfs.h>
 #include <sd.h>
 #include <spi-xmega.h>
 #include <dev/watchdog.h>
@@ -53,6 +54,7 @@
 #define dprintf(...)
 #endif
 
+#define CFS_STATUS_FILE "/cfs_status.txt"
 
 static spi_xmega_slave_t spi_slaves [] = {
 	{
@@ -89,7 +91,33 @@ static void sd_init(void)
 	}
 }
 
+/**
+ *
+ */
+static void cfs_init(void)
+{
+	int fd;
 
+	if (sd_fd < 0) {
+		dprintf("CFS not initialised, no SD Card\n");
+		return;
+	}
+
+	fd = cfs_open(CFS_STATUS_FILE, CFS_WRITE);
+	if (fd < 0) {
+		dprintf("Formating SD Card for CFS...");
+		cfs_coffee_format();
+		dprintf("OK\n");
+
+		fd = cfs_open(CFS_STATUS_FILE, CFS_WRITE);
+		if (fd < 0) {
+			dprintf("CFS not initialised, could not open status file\n");
+			return;
+		}
+		cfs_write(fd, "CFS OK\n", 8);
+	}
+	cfs_close(fd);
+}
 
 /**
  *
@@ -126,6 +154,7 @@ static void initalize(void)
 	/* SPI Busses */
 	spi_init_multi(spi_slaves, 1);
 	sd_init();
+	cfs_init();
 
 	/* Process subsystem */
 	dprintf("Starting process subsystem\n");
