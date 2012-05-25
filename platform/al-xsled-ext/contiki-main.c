@@ -46,7 +46,6 @@
 #include <dev/rs232.h>
 #include <dev/leds.h>
 
-
 #define ANNOUNCE_BOOT 1
 #define DEBUG
 #ifdef DEBUG
@@ -56,6 +55,7 @@
 #endif
 
 #define CFS_STATUS_FILE "/cfs_status.txt"
+extern int sensor_db_init(void);
 
 static spi_xmega_slave_t spi_slaves [] = {
 	{
@@ -106,7 +106,7 @@ static int cfs_init(void)
 		return -1;
 	}
 
-#if 0
+#ifdef FORMAT_SD_CARD
 	dprintf("Formating SD Card for CFS...");
 	cfs_coffee_format();
 	dprintf("OK\n");
@@ -126,62 +126,6 @@ static int cfs_init(void)
 		cfs_write(fd, "CFS OK\n", 8);
 	}
 	cfs_close(fd);
-
-	return 0;
-}
-
-/**
- *
- */
-static int sensor_db_init(void)
-{
-	db_handle_t handle;
-	db_result_t result;
-
-	result = db_query(&handle, "SELECT id, name, unit, scale FROM sensor;");
-	db_free(&handle);
-	if (DB_ERROR(result) != 0) {
-		dprintf("DB creating sensor table...\n");
-
-		db_query(NULL, "REMOVE RELATION sensor;");
-		db_query(NULL, "CREATE RELATION sensor;");
-		db_query(NULL, "CREATE ATTRIBUTE id DOMAIN INT IN sensor;");
-		db_query(NULL, "CREATE ATTRIBUTE name DOMAIN STRING(10) IN sensor;");
-		db_query(NULL, "CREATE ATTRIBUTE unit DOMAIN STRING(10) IN sensor;");
-		db_query(NULL, "CREATE ATTRIBUTE scale DOMAIN INT IN sensor;");
-		db_query(NULL, "CREATE INDEX sensor.id TYPE INLINE;");
-		db_query(NULL, "CREATE INDEX sensor.name TYPE INLINE;");
-
-		result = db_query(&handle, "SELECT id, name, unit, scale FROM sensor;");
-		db_free(&handle);
-		if (DB_ERROR(result) != 0) {
-			dprintf("DB table init failed with reason : %s\n",
-								db_get_result_message(result));
-			return -1;
-		}
-	}
-
-	result = db_query(&handle, "SELECT sensor_id, time, value FROM sample;");
-	db_free(&handle);
-	if (DB_ERROR(result) != 0) {
-		dprintf("DB creating sample table...\n");
-
-		db_query(NULL, "REMOVE RELATION sample;");
-		db_query(NULL, "CREATE RELATION sample;");
-		db_query(NULL, "CREATE ATTRIBUTE sensor_id DOMAIN INT IN sample;");
-		db_query(NULL, "CREATE ATTRIBUTE time DOMAIN INT IN sample;");
-		db_query(NULL, "CREATE ATTRIBUTE value DOMAIN INT IN sample;");
-		db_query(NULL, "CREATE INDEX sample.sensor_id TYPE INLINE;");
-		db_query(NULL, "CREATE INDEX sample.time TYPE INLINE;");
-
-		result = db_query(&handle, "SELECT sensor_id, time, value FROM sample;");
-		db_free(&handle);
-		if (DB_ERROR(result) != 0) {
-			dprintf("DB table init failed with reason : %s\n",
-					db_get_result_message(result));
-			return -2;
-		}
-	}
 
 	return 0;
 }
@@ -212,8 +156,10 @@ static void initalize(void)
 		printf_P(PSTR("Watchdog caused reset!\n"));
 		leds_on(LED_ALERT);
 	}
+#ifdef WATCHDOG_ENABLE
 	watchdog_init();
 	watchdog_start();
+#endif
 
 	/* Clock */
 	clock_init();
@@ -230,11 +176,13 @@ static void initalize(void)
 		leds_on(LED_ALERT);
 		while (1);
 	}
+#ifdef SENSOR_APP
 	if (sensor_db_init() != 0) {
 		printf_P(PSTR("Boot halted, Sensor DB failed init!\n"));
 		leds_on(LED_ALERT);
 		while (1);
 	}
+#endif
 
 	/* Process subsystem */
 	dprintf("Starting process subsystem\n");
@@ -252,7 +200,9 @@ int main(void)
 
 	dprintf("Starting main loop...\n");
 	while (1) {
+#ifdef WATCHDOG_ENABLE
 		watchdog_periodic();
+#endif
 		process_run();
 	}
 

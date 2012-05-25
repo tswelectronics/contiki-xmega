@@ -51,5 +51,19 @@
 #define CCIF
 #define CLIF
 
+/* CFS */
+#define COFFEE_IO_SEMANTICS	1
+
+/* AQL */
+#define DB_FEATURE_FLOATS				0
+#define DB_INDEX_POOL_SIZE				4
+#define DB_RELATION_POOL_SIZE			2
+#define DB_MAX_ATTRIBUTES_PER_RELATION	4
+
+/* Options */
+#define SENSOR_APP			1
+#define SENSOR_APP_DEBUG	1
+//#define WATCHDOG_ENABLE	1
+//#define FORMAT_SD_CARD	1
 
 #endif /* __CONTIKI_CONF_H__ */
