@@ -5,10 +5,11 @@
 # Make file for AL-XSLED_EXT Development Board with ATXmega256a3 and Micro-SD.
 #
 
-CONTIKI_TARGET_DIRS = . apps
+CONTIKI_TARGET_DIRS = . apps ../../apps
 CONTIKI_CORE=contiki-main
 CONTIKI_TARGET_MAIN = ${CONTIKI_CORE}.o
 CONTIKI_TARGET_SOURCEFILES += contiki-main.c on-chip-sensors.c hello-world.c
+CONTIKI_TARGET_SOURCEFILES += cfs-coffee.c cfs-coffee-arch.c
 CLEAN += symbols.c symbols.h al-xs-app.hex
 
 CONTIKIAVR=$(CONTIKI)/cpu/avr

@@ -29,8 +29,6 @@ AVR += spi-xmega.c sd-xmega.c
 #ELFLOADER  = elfloader.c elfloader-avr.c symtab-avr.c
 TARGETLIBS = leds.c sd.c
 #random.c
-CONTIKI_TARGET_SOURCEFILES += cfs-coffee.c cfs-coffee-arch.c 
-
 
 ifdef USB
 ### Add the directories for the USB stick and remove the default rs232 driver

@@ -38,6 +38,7 @@
 #include <contiki.h>
 #include <autostart.h>
 #include <interrupt.h>
+#include <antelope.h>
 #include <cfs.h>
 #include <sd.h>
 #include <spi-xmega.h>
@@ -74,34 +75,42 @@ int8_t sd_fd  = -1;
 /**
  *
  */
-static void sd_init(void)
+static int sd_init(void)
 {
 	int rc;
 
 	sd_fd = spi_open(&spi_slaves[0]);
 	if (sd_fd < 0) {
 		dprintf("spi open failed\n");
-		return;
+		return -1;
 	}
 
 	rc = sd_initialize(&spi_slaves[0]);
 	if (rc != 0) {
 		dprintf("SD init result %d\n", rc);
-		return;
+		return rc;
 	}
+
+	return 0;
 }
 
 /**
  *
  */
-static void cfs_init(void)
+static int cfs_init(void)
 {
 	int fd;
 
 	if (sd_fd < 0) {
 		dprintf("CFS not initialised, no SD Card\n");
-		return;
+		return -1;
 	}
+
+#if 0
+	dprintf("Formating SD Card for CFS...");
+	cfs_coffee_format();
+	dprintf("OK\n");
+#endif
 
 	fd = cfs_open(CFS_STATUS_FILE, CFS_WRITE);
 	if (fd < 0) {
@@ -112,11 +121,69 @@ static void cfs_init(void)
 		fd = cfs_open(CFS_STATUS_FILE, CFS_WRITE);
 		if (fd < 0) {
 			dprintf("CFS not initialised, could not open status file\n");
-			return;
+			return -2;
 		}
 		cfs_write(fd, "CFS OK\n", 8);
 	}
 	cfs_close(fd);
+
+	return 0;
+}
+
+/**
+ *
+ */
+static int sensor_db_init(void)
+{
+	db_handle_t handle;
+	db_result_t result;
+
+	result = db_query(&handle, "SELECT id, name, unit, scale FROM sensor;");
+	db_free(&handle);
+	if (DB_ERROR(result) != 0) {
+		dprintf("DB creating sensor table...\n");
+
+		db_query(NULL, "REMOVE RELATION sensor;");
+		db_query(NULL, "CREATE RELATION sensor;");
+		db_query(NULL, "CREATE ATTRIBUTE id DOMAIN INT IN sensor;");
+		db_query(NULL, "CREATE ATTRIBUTE name DOMAIN STRING(10) IN sensor;");
+		db_query(NULL, "CREATE ATTRIBUTE unit DOMAIN STRING(10) IN sensor;");
+		db_query(NULL, "CREATE ATTRIBUTE scale DOMAIN INT IN sensor;");
+		db_query(NULL, "CREATE INDEX sensor.id TYPE INLINE;");
+		db_query(NULL, "CREATE INDEX sensor.name TYPE INLINE;");
+
+		result = db_query(&handle, "SELECT id, name, unit, scale FROM sensor;");
+		db_free(&handle);
+		if (DB_ERROR(result) != 0) {
+			dprintf("DB table init failed with reason : %s\n",
+								db_get_result_message(result));
+			return -1;
+		}
+	}
+
+	result = db_query(&handle, "SELECT sensor_id, time, value FROM sample;");
+	db_free(&handle);
+	if (DB_ERROR(result) != 0) {
+		dprintf("DB creating sample table...\n");
+
+		db_query(NULL, "REMOVE RELATION sample;");
+		db_query(NULL, "CREATE RELATION sample;");
+		db_query(NULL, "CREATE ATTRIBUTE sensor_id DOMAIN INT IN sample;");
+		db_query(NULL, "CREATE ATTRIBUTE time DOMAIN INT IN sample;");
+		db_query(NULL, "CREATE ATTRIBUTE value DOMAIN INT IN sample;");
+		db_query(NULL, "CREATE INDEX sample.sensor_id TYPE INLINE;");
+		db_query(NULL, "CREATE INDEX sample.time TYPE INLINE;");
+
+		result = db_query(&handle, "SELECT sensor_id, time, value FROM sample;");
+		db_free(&handle);
+		if (DB_ERROR(result) != 0) {
+			dprintf("DB table init failed with reason : %s\n",
+					db_get_result_message(result));
+			return -2;
+		}
+	}
+
+	return 0;
 }
 
 /**
@@ -153,8 +220,21 @@ static void initalize(void)
 
 	/* SPI Busses */
 	spi_init_multi(spi_slaves, 1);
-	sd_init();
-	cfs_init();
+	if (sd_init() != 0) {
+		printf_P(PSTR("Boot halted, SD-card failed init!\n"));
+		leds_on(LED_ALERT);
+		while (1);
+	}
+	if (cfs_init() != 0) {
+		printf_P(PSTR("Boot halted, Coffee FS failed init!\n"));
+		leds_on(LED_ALERT);
+		while (1);
+	}
+	if (sensor_db_init() != 0) {
+		printf_P(PSTR("Boot halted, Sensor DB failed init!\n"));
+		leds_on(LED_ALERT);
+		while (1);
+	}
 
 	/* Process subsystem */
 	dprintf("Starting process subsystem\n");

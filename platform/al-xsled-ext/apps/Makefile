@@ -11,4 +11,5 @@ CONTIKI_PROJECT = al-xs-app
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = ../../..
+APPS = antelope
 include $(CONTIKI)/Makefile.include

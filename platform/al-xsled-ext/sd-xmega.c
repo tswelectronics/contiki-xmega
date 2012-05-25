@@ -64,11 +64,13 @@ int sd_arch_init(void *desc)
 
 void sd_arch_spi_write(uint8_t c)
 {
+	watchdog_periodic();
 	spi_write(sd_fd, &c, 1);
 }
 
 void sd_arch_spi_write_block(uint8_t *bytes, int amount)
 {
+	watchdog_periodic();
 	spi_write(sd_fd, bytes, amount);
 }
 
@@ -76,6 +78,7 @@ unsigned sd_arch_spi_read(void)
 {
 	uint8_t r;
 
+	watchdog_periodic();
 	spi_read(sd_fd, &r, 1);
 
 	return r;
