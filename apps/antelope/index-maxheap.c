@@ -64,7 +64,7 @@
 #include "storage.h"
 
 #define DEBUG DEBUG_NONE
-#include "net/uip-debug.h"
+#include "debug.h"
 
 #define BRANCH_FACTOR	2
 #define BUCKET_SIZE	128

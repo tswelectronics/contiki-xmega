@@ -46,6 +46,8 @@
 #define DEBUG_PRINT     1
 #define DEBUG_ANNOTATE  2
 #define DEBUG_FULL      DEBUG_ANNOTATE | DEBUG_PRINT
+//#define DEBUG_NONE      DEBUG_FULL
+
 
 #if (DEBUG) & DEBUG_ANNOTATE
 #include <stdio.h>

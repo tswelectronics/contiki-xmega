@@ -42,7 +42,7 @@
 #include <string.h>
 
 #define DEBUG DEBUG_NONE
-#include "net/uip-debug.h"
+#include "debug.h"
 
 #include "index.h"
 #include "relation.h"
