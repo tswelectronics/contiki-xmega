@@ -116,7 +116,7 @@ binary_search(index_iterator_t *index_iterator,
   attr = index_iterator->index->attr;
 
   max = relation_cardinality(rel);
-  if(max == INVALID_TUPLE) {
+  if((max == INVALID_TUPLE) || (max == 0)) {
     return INVALID_TUPLE;
   }
   max--;
