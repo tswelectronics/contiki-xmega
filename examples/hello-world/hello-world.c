@@ -41,16 +41,52 @@
 #include "contiki.h"
 
 #include <stdio.h> /* For printf() */
+#include <dev/rs232.h>
+
+#define DEBUG
+#ifdef DEBUG
+#define dprintf(FORMAT, args...) printf_P(PSTR(FORMAT), ##args)
+#else
+#define dprintf(...)
+#endif
+
 /*---------------------------------------------------------------------------*/
 PROCESS(hello_world_process, "Hello world process");
 AUTOSTART_PROCESSES(&hello_world_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(hello_world_process, ev, data)
 {
-  PROCESS_BEGIN();
 
-  printf("Hello, world\n");
-  
-  PROCESS_END();
+	static struct etimer our_ev_timer;
+
+	PROCESS_BEGIN();
+
+	dprintf("Hello, world\n");
+
+	struct process *p = PROCESS_CURRENT();
+	
+	dprintf("Process=%p Thread=%p  Name=\"%s\" \n",p,p->thread,PROCESS_NAME_STRING(p));
+
+	etimer_set(&our_ev_timer, 1 * CLOCK_SECOND);
+ 
+	PROCESS_WAIT_UNTIL(etimer_expired( &our_ev_timer) );
+
+	dprintf("Waited 1 seconds, start main loop!\n");
+
+	while(1)
+	{
+
+		PROCESS_WAIT_UNTIL(etimer_expired( &our_ev_timer) );
+		if ( etimer_expired(&our_ev_timer) ) 
+		{
+			etimer_set(&our_ev_timer, CLOCK_SECOND * 1);
+    	}
+			
+		dprintf("Periodic entry into routine performed!\n");
+	  dprintf("Process=%p Thread=%p  Name=\"%s\" \n",p,p->thread,PROCESS_NAME_STRING(p));
+
+	}
+ 
+	PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
